@@ -108,8 +108,13 @@ html,body{height:100%;overflow:hidden;background:#1D4E2B;font-family:'DM Sans',s
 #route-info-sheet{position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);width:100%;max-width:480px;max-height:65vh;overflow-y:auto;z-index:8001;background:var(--bg);border-radius:20px 20px 0 0;box-shadow:0 -4px 30px rgba(0,0,0,0.2);transition:transform .35s cubic-bezier(0.32,0.72,0,1);padding-bottom:env(safe-area-inset-bottom,0px)}
 #route-info-sheet.open{transform:translateX(-50%) translateY(0)}
 #route-sheet-accent{height:5px;width:100%}
-.route-sheet-handle-row{display:flex;justify-content:center;padding:10px 0 2px}
-.route-sheet-handle{width:36px;height:4px;border-radius:2px;background:var(--border)}
+.route-sheet-handle-row{position:sticky;top:0;z-index:2;display:flex;justify-content:center;padding:12px 0 8px;background:var(--bg);cursor:grab;touch-action:none}
+.route-sheet-handle{width:44px;height:5px;border-radius:3px;background:var(--muted);opacity:.45}
+.route-sheet-close{position:absolute;top:6px;right:12px;width:34px;height:34px;border-radius:50%;border:0.5px solid var(--border);background:var(--bg2);color:var(--text);font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.route-sheet-close:active{transform:scale(.94)}
+#route-info-sheet.dragging{transition:none}
+.route-sheet-view-map{margin-left:auto;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;padding:7px 12px;border-radius:16px;border:1.5px solid var(--border);background:var(--bg);color:var(--text);cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.route-sheet-view-map:active{background:var(--bg2)}
 .route-sheet-inner{padding:4px 20px 24px}
 .route-sheet-eyebrow{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
 .route-sheet-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;line-height:1.2;margin-bottom:10px}
@@ -449,7 +454,7 @@ body.font-xlarge .stop-card,.font-xlarge .place-card,.font-xlarge .time-card{lin
     </button>
     <button class="route-clear" id="route-clear-btn" aria-label="Clear route" onclick="activateRoute(activeRoute)">✕</button>
     <!-- Build Route button -->
-    <button class="build-route-btn" id="build-route-btn" onclick="openBuilderSheet()">✦ Build Route</button>
+    <button class="build-route-btn" id="build-route-btn" onclick="openBuilderSheet()" data-i18n="build_route_btn">✦ Build Route</button>
     <!-- hidden pills kept for JS compat -->
     <button class="route-pill" data-route="public-art" style="display:none">🎨 Public Art Trail</button>
     <button class="route-pill" data-route="green-spaces" style="display:none">🌳 Green Spaces</button>
@@ -464,7 +469,7 @@ body.font-xlarge .stop-card,.font-xlarge .place-card,.font-xlarge .time-card{lin
       <div id="map"></div>
       <button id="locate-btn" class="locate-fab" onclick="locateMe()">
         <span style="font-size:18px;line-height:1">📍</span>
-        <span style="font-size:9px;font-weight:600;line-height:1;margin-top:1px">I'm here</span>
+        <span style="font-size:9px;font-weight:600;line-height:1;margin-top:1px" data-i18n="locate_short">I'm here</span>
       </button>
       <button id="demo-fab" onclick="openDemoSheet()">
         <span style="font-size:18px;line-height:1">📊</span>
@@ -479,25 +484,25 @@ body.font-xlarge .stop-card,.font-xlarge .place-card,.font-xlarge .time-card{lin
       </div>
       <!-- In-app navigation bar -->
       <div id="nav-bar">
-        <div id="nav-locating-banner" style="display:none;font-size:12px;color:var(--muted);text-align:center;padding:4px 0 2px">📍 Getting your location…</div>
+        <div id="nav-locating-banner" style="display:none;font-size:12px;color:var(--muted);text-align:center;padding:4px 0 2px" data-i18n="nav_locating">📍 Getting your location…</div>
         <div id="nav-arrival-banner" style="display:none;background:var(--nav-route-color,var(--brand));color:#fff;border-radius:10px;padding:8px 12px;margin-bottom:4px;display:none;flex-direction:row;align-items:center;gap:8px">
           <span style="font-size:18px">📍</span>
           <div style="flex:1;min-width:0">
-            <div style="font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;opacity:.85">You've arrived</div>
+            <div style="font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;opacity:.85" data-i18n="nav_arrived">You've arrived</div>
             <div id="nav-arrival-stop-name" style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
           </div>
-          <button onclick="navConfirmArrival()" style="font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;padding:6px 12px;border-radius:16px;border:none;background:#fff;color:var(--nav-route-color,var(--brand));cursor:pointer;white-space:nowrap;flex-shrink:0">Continue →</button>
+          <button onclick="navConfirmArrival()" style="font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;padding:6px 12px;border-radius:16px;border:none;background:#fff;color:var(--nav-route-color,var(--brand));cursor:pointer;white-space:nowrap;flex-shrink:0" data-i18n="nav_continue">Continue →</button>
         </div>
         <div class="nav-bar-top">
           <div class="nav-bar-stop-num" id="nav-stop-num">1</div>
           <div class="nav-bar-info">
-            <div class="nav-bar-next-label" id="nav-next-label">Next Stop</div>
+            <div class="nav-bar-next-label" id="nav-next-label" data-i18n="nav_next_stop">Next Stop</div>
             <div class="nav-bar-stop-name" id="nav-stop-name">—</div>
             <div class="nav-bar-dist" id="nav-stop-dist"></div>
           </div>
           <div style="display:flex;gap:6px;flex-shrink:0">
-            <button id="nav-next-btn" onclick="navAdvanceStop()" style="font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;padding:6px 12px;border-radius:20px;border:none;background:var(--nav-route-color,var(--brand));color:#fff;cursor:pointer;white-space:nowrap">Next →</button>
-            <button id="nav-end-btn" onclick="stopNavigation()">End</button>
+            <button id="nav-next-btn" onclick="navAdvanceStop()" style="font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;padding:6px 12px;border-radius:20px;border:none;background:var(--nav-route-color,var(--brand));color:#fff;cursor:pointer;white-space:nowrap" data-i18n="wiz_next">Next →</button>
+            <button id="nav-end-btn" onclick="stopNavigation()" data-i18n="nav_end">End</button>
           </div>
         </div>
         <div class="nav-bar-progress"><div class="nav-bar-progress-fill" id="nav-progress-fill" style="width:0%"></div></div>
@@ -505,24 +510,24 @@ body.font-xlarge .stop-card,.font-xlarge .place-card,.font-xlarge .time-card{lin
       <!-- Builder map preview bar -->
       <div id="builder-preview-bar">
         <div class="bpb-info">
-          <div class="bpb-label">Route Preview</div>
+          <div class="bpb-label" data-i18n="bpb_label">Route Preview</div>
           <div class="bpb-title" id="bpb-title">Your Route</div>
           <div class="bpb-meta" id="bpb-meta"></div>
         </div>
         <div class="bpb-actions">
-          <button class="bpb-btn-back" onclick="exitBuilderPreview()">← Edit</button>
-          <button class="bpb-btn-nav" onclick="startNavFromBuilderPreview()">🧭 Walk</button>
-          <button class="bpb-btn-send" onclick="confirmBuilderRoute()">Save →</button>
+          <button class="bpb-btn-back" onclick="exitBuilderPreview()" data-i18n="bpb_edit">← Edit</button>
+          <button class="bpb-btn-nav" onclick="startNavFromBuilderPreview()" data-i18n="bpb_walk">🧭 Walk</button>
+          <button class="bpb-btn-send" onclick="confirmBuilderRoute()" data-i18n="bpb_save">Save →</button>
         </div>
       </div>
     </div>
     <div class="view" id="list-view">
-      <div class="list-header">Showing <strong id="count-shown">19</strong> of <strong id="count-all">19</strong> stops<span id="filter-label" style="margin-left:6px;font-size:11px;color:var(--brand);font-weight:500"></span><span id="progress-badge" style="margin-left:auto;font-size:11px;font-weight:600;color:var(--brand)"></span></div>
+      <div class="list-header"><span id="count-text"><span data-i18n="list_showing">Showing</span> <strong id="count-shown">19</strong> <span data-i18n="list_of">of</span> <strong id="count-all">19</strong> <span data-i18n="list_stops">stops</span></span><span id="filter-label" style="margin-left:6px;font-size:11px;color:var(--brand);font-weight:500"></span><span id="progress-badge" style="margin-left:auto;font-size:11px;font-weight:600;color:var(--brand)"></span></div>
       <div id="theme-filter-bar" style="display:flex;gap:6px;padding:8px 14px;border-bottom:0.5px solid var(--border);overflow-x:auto;flex-shrink:0;-webkit-overflow-scrolling:touch">
-        <button class="theme-filter-btn active" data-theme="" style="font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;padding:4px 10px;border-radius:14px;border:1px solid var(--border);background:var(--brand);color:white;cursor:pointer;white-space:nowrap;flex-shrink:0">All</button>
-        <button class="theme-filter-btn" data-theme="industry-innovation" style="font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;padding:4px 10px;border-radius:14px;border:1px solid #1a56c4;background:#e8f0fe;color:#1a56c4;cursor:pointer;white-space:nowrap;flex-shrink:0">🏭 Industry & Innovation</button>
-        <button class="theme-filter-btn" data-theme="organizing-activism" style="font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;padding:4px 10px;border-radius:14px;border:1px solid #8B0000;background:#fce8e8;color:#8B0000;cursor:pointer;white-space:nowrap;flex-shrink:0">✊ Organizing & Activism</button>
-        <button class="theme-filter-btn" data-theme="culture-identity" style="font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;padding:4px 10px;border-radius:14px;border:1px solid #6a1b9a;background:#f3e8f7;color:#6a1b9a;cursor:pointer;white-space:nowrap;flex-shrink:0">🎭 Culture & Identity</button>
+        <button class="theme-filter-btn active" data-theme="" style="font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;padding:4px 10px;border-radius:14px;border:1px solid var(--border);background:var(--brand);color:white;cursor:pointer;white-space:nowrap;flex-shrink:0" data-i18n="theme_all">All</button>
+        <button class="theme-filter-btn" data-theme="industry-innovation" style="font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;padding:4px 10px;border-radius:14px;border:1px solid #1a56c4;background:#e8f0fe;color:#1a56c4;cursor:pointer;white-space:nowrap;flex-shrink:0" data-i18n="theme_industry">🏭 Industry & Innovation</button>
+        <button class="theme-filter-btn" data-theme="organizing-activism" style="font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;padding:4px 10px;border-radius:14px;border:1px solid #8B0000;background:#fce8e8;color:#8B0000;cursor:pointer;white-space:nowrap;flex-shrink:0" data-i18n="theme_organizing">✊ Organizing & Activism</button>
+        <button class="theme-filter-btn" data-theme="culture-identity" style="font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;padding:4px 10px;border-radius:14px;border:1px solid #6a1b9a;background:#f3e8f7;color:#6a1b9a;cursor:pointer;white-space:nowrap;flex-shrink:0" data-i18n="theme_culture">🎭 Culture & Identity</button>
       </div>
       <div id="route-banner" style="display:none;padding:10px 14px;background:#f3e8f7;border-bottom:0.5px solid #d4a8e0;flex-shrink:0;align-items:flex-start;gap:8px"></div>
       <div id="stop-cards"></div>
@@ -534,25 +539,25 @@ body.font-xlarge .stop-card,.font-xlarge .place-card,.font-xlarge .time-card{lin
 
         <!-- Themed route quick-load -->
         <div style="margin-bottom:14px">
-          <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.3px;margin-bottom:8px">⚡ QUICK ROUTES</div>
+          <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.3px;margin-bottom:8px" data-i18n="dir_quick">⚡ QUICK ROUTES</div>
           <div style="display:flex;gap:6px;flex-wrap:wrap">
-            <button class="quick-route-btn" onclick="previewThemeRoute('essential')">⭐ Essential Pullman</button>
-            <button class="quick-route-btn" onclick="previewThemeRoute('public-art')">🎨 Public Art</button>
-            <button class="quick-route-btn" onclick="previewThemeRoute('people')">👤 People</button>
-            <button class="quick-route-btn" onclick="previewThemeRoute('architecture')">🏛 Architecture</button>
-            <button class="quick-route-btn" onclick="previewThemeRoute('railroad')">🚂 Railroad</button>
-            <button class="quick-route-btn" onclick="previewThemeRoute('strike')">✊ Pullman Strike</button>
-            <button class="quick-route-btn" onclick="previewThemeRoute('green-spaces')">🌳 Green Spaces</button>
-            <button class="quick-route-btn" onclick="previewThemeRoute('veterans')">🎖 Veterans</button>
-            <button class="quick-route-btn" onclick="previewThemeRoute('film')">🎬 Film</button>
+            <button class="quick-route-btn" onclick="previewThemeRoute('essential')" data-i18n="qr_essential">⭐ Essential Pullman</button>
+            <button class="quick-route-btn" onclick="previewThemeRoute('public-art')" data-i18n="qr_art">🎨 Public Art</button>
+            <button class="quick-route-btn" onclick="previewThemeRoute('people')" data-i18n="qr_people">👤 People</button>
+            <button class="quick-route-btn" onclick="previewThemeRoute('architecture')" data-i18n="qr_arch">🏛 Architecture</button>
+            <button class="quick-route-btn" onclick="previewThemeRoute('railroad')" data-i18n="qr_rail">🚂 Railroad</button>
+            <button class="quick-route-btn" onclick="previewThemeRoute('strike')" data-i18n="qr_strike">✊ Pullman Strike</button>
+            <button class="quick-route-btn" onclick="previewThemeRoute('green-spaces')" data-i18n="qr_green">🌳 Green Spaces</button>
+            <button class="quick-route-btn" onclick="previewThemeRoute('veterans')" data-i18n="qr_vets">🎖 Veterans</button>
+            <button class="quick-route-btn" onclick="previewThemeRoute('film')" data-i18n="qr_film">🎬 Film</button>
           </div>
         </div>
 
         <!-- Route summary bar -->
         <div class="route-summary" id="route-summary" style="display:none">
-          <div class="stat-card"><strong id="rs-dist">0 mi</strong><span>Distance</span></div>
-          <div class="stat-card"><strong id="rs-time">0 min</strong><span>Walking</span></div>
-          <div class="stat-card"><strong id="rs-stops">0</strong><span>Stops</span></div>
+          <div class="stat-card"><strong id="rs-dist">0 mi</strong><span data-i18n="dir_distance">Distance</span></div>
+          <div class="stat-card"><strong id="rs-time">0 min</strong><span data-i18n="dir_walking">Walking</span></div>
+          <div class="stat-card"><strong id="rs-stops">0</strong><span data-i18n="dir_stops">Stops</span></div>
         </div>
 
         <!-- Built route -->
@@ -563,34 +568,34 @@ body.font-xlarge .stop-card,.font-xlarge .place-card,.font-xlarge .time-card{lin
           <div style="display:flex;gap:8px;margin-bottom:8px">
             <button onclick="startNavigationFromDirections()" style="font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;padding:13px 10px;border-radius:10px;border:none;background:var(--brand);color:#fff;cursor:pointer;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;line-height:1.2">
               <span style="font-size:20px">🧭</span>
-              <span>Walk the Trail</span>
-              <span style="font-size:11px;font-weight:500;opacity:.8">In-app navigation</span>
+              <span data-i18n="walk_trail">Walk the Trail</span>
+              <span style="font-size:11px;font-weight:500;opacity:.8" data-i18n="inapp_nav">In-app navigation</span>
             </button>
             <a id="maps-link" href="#" target="_blank" style="font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;padding:13px 10px;border-radius:10px;background:var(--bg2);color:var(--text);border:1.5px solid var(--border);text-decoration:none;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;line-height:1.2;text-align:center">
               <span style="font-size:20px">🚗</span>
               <span>Google Maps</span>
-              <span style="font-size:11px;font-weight:500;color:var(--muted)">Driving or walking</span>
+              <span style="font-size:11px;font-weight:500;color:var(--muted)" data-i18n="drive_or_walk">Driving or walking</span>
             </a>
           </div>
           <div id="maps-extra-legs" style="display:none;flex-direction:column;gap:4px;margin-bottom:6px"></div>
-          <button class="clear-btn" id="clear-route">Clear route</button>
+          <button class="clear-btn" id="clear-route" data-i18n="clear_route">Clear route</button>
         </div>
 
         <!-- Stop picker -->
         <div class="picker-header">
-          <span>Add stops</span>
+          <span data-i18n="add_stops">Add stops</span>
           <input type="text" id="stop-search" placeholder="Search stops…" />
         </div>
         <!-- Category filter -->
         <div id="picker-filter" style="display:flex;gap:6px;flex-wrap:wrap;padding:8px 0 4px">
-          <button class="picker-cat-btn active" data-cat="">All</button>
-          <button class="picker-cat-btn" data-cat="Landmark">Landmarks</button>
-          <button class="picker-cat-btn" data-cat="Museum">Museums</button>
-          <button class="picker-cat-btn" data-cat="Transit">Transit</button>
-          <button class="picker-cat-btn" data-cat="PublicArt">🎨 Art</button>
-          <button class="picker-cat-btn" data-cat="GreenSpace">🌳 Green</button>
-          <button class="picker-cat-btn" data-cat="Veterans">🎖 Veterans</button>
-          <button class="picker-cat-btn" data-cat="Film">🎬 Film</button>
+          <button class="picker-cat-btn active" data-cat="" data-i18n="pk_all">All</button>
+          <button class="picker-cat-btn" data-cat="Landmark" data-i18n="pk_landmarks">Landmarks</button>
+          <button class="picker-cat-btn" data-cat="Museum" data-i18n="pk_museums">Museums</button>
+          <button class="picker-cat-btn" data-cat="Transit" data-i18n="pk_transit">Transit</button>
+          <button class="picker-cat-btn" data-cat="PublicArt" data-i18n="pk_art">🎨 Art</button>
+          <button class="picker-cat-btn" data-cat="GreenSpace" data-i18n="pk_green">🌳 Green</button>
+          <button class="picker-cat-btn" data-cat="Veterans" data-i18n="pk_vets">🎖 Veterans</button>
+          <button class="picker-cat-btn" data-cat="Film" data-i18n="pk_film">🎬 Film</button>
         </div>
         <div id="stop-picker"></div>
       </div>
@@ -980,6 +985,29 @@ function mapsLegUrls(pts){
   return legs;
 }
 
+// ── Language helpers for categories, directions, and opening hours ──
+function catLabel(c){
+  const es={Landmark:'Monumento',Museum:'Museo',Transit:'Transporte público',People:'Personas',GreenSpace:'Espacio verde',Film:'Cine',Veterans:'Veteranos',PublicArt:'Arte público'};
+  const en={GreenSpace:'Green space',PublicArt:'Public art'};
+  return currentLang==='es' ? (es[c]||c) : (en[c]||c);
+}
+function dirLabel(d){
+  if(currentLang!=='es') return d;
+  return ({north:'norte',northeast:'noreste',east:'este',southeast:'sureste',south:'sur',southwest:'suroeste',west:'oeste',northwest:'noroeste',
+           N:'N',NE:'NE',E:'E',SE:'SE',S:'S',SW:'SO',W:'O',NW:'NO'})[d]||d;
+}
+function hoursLabel(h){
+  if(!h || currentLang!=='es') return h;
+  return h
+    .replace(/Open daily during park hours/g,'Abierto todos los días durante el horario del parque')
+    .replace(/Open daily/g,'Abierto todos los días')
+    .replace(/Free admission/g,'Entrada gratuita').replace(/Donations welcome/g,'Se aceptan donaciones')
+    .replace(/federal holidays/g,'días feriados federales').replace(/Closed/g,'Cerrado')
+    .replace(/Daily/g,'Diario').replace(/ & /g,' y ')
+    .replace(/\bMon\b/g,'Lun').replace(/\bTue\b/g,'Mar').replace(/\bWed\b/g,'Mié').replace(/\bThu\b/g,'Jue')
+    .replace(/\bFri\b/g,'Vie').replace(/\bSat\b/g,'Sáb').replace(/\bSun\b/g,'Dom');
+}
+
 function getVisible(){
   const routeStopIds=activeRoute?new Set(routes[activeRoute].stops):new Set();
   // All non-timed (thematic) route stops are route-exclusive — hide unless their route is active
@@ -1281,14 +1309,14 @@ function showSheet(s){
     }
     attempt();
   })();
-  const ce=document.getElementById('sh-cat');ce.textContent=s.cat;ce.className='stop-cat cat-'+s.cat;
+  const ce=document.getElementById('sh-cat');ce.textContent=catLabel(s.cat);ce.className='stop-cat cat-'+s.cat;
   // Theme badges
   const themeEl=document.getElementById('sh-themes');
   themeEl.innerHTML='';
   const themeMap={
-    'industry-innovation':{label:'🏭 Industry & Innovation',cls:'theme-industry'},
-    'organizing-activism':{label:'✊ Organizing & Activism',cls:'theme-organizing'},
-    'culture-identity':{label:'🎭 Culture & Identity',cls:'theme-culture'}
+    'industry-innovation':{label:t('theme_industry'),cls:'theme-industry'},
+    'organizing-activism':{label:t('theme_organizing'),cls:'theme-organizing'},
+    'culture-identity':{label:t('theme_culture'),cls:'theme-culture'}
   };
   if(s.themes) s.themes.forEach(th=>{
     const t=themeMap[th];
@@ -1307,7 +1335,7 @@ function showSheet(s){
   if(typeof gtag!=='undefined') gtag('event','view_stop',{stop_name:s.name,stop_category:s.cat});
   // Hours
   const hoursEl=document.getElementById('sh-hours');
-  if(s.hours){hoursEl.innerHTML=`<span style="font-size:13px;color:#666">🕐 ${s.hours}</span>`;hoursEl.style.display='block';}
+  if(s.hours){hoursEl.innerHTML=`<span style="font-size:13px;color:#666">🕐 ${hoursLabel(s.hours)}</span>`;hoursEl.style.display='block';}
   else{hoursEl.style.display='none';}
   const le=document.getElementById('sh-links');le.innerHTML='';
   if(s.cat==='Transit'){
@@ -1320,8 +1348,8 @@ function showSheet(s){
   } else if(s.cat==='People'){
     if(s.role) le.innerHTML+=`<div style="font-size:12px;font-weight:600;color:#00796B;margin-bottom:3px;display:flex;align-items:center;gap:5px"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="10" fill="#00796B"/><circle cx="10" cy="7.5" r="3" fill="white"/><path d="M4 17c0-3.314 2.686-5 6-5s6 1.686 6 5" stroke="white" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg>${s.role}</div>`;
     if(s.period) le.innerHTML+=`<div style="font-size:11px;color:var(--muted);margin-bottom:6px">📅 ${s.period}</div>`;
-    if(s.link) le.innerHTML+=`<a class="stop-link" href="${s.link}" target="_blank">🔗 Learn more ↗</a>`;
-    if(s.link2) le.innerHTML+=`<a class="stop-link" href="${s.link2}" target="_blank">🔗 More info ↗</a>`;
+    if(s.link) le.innerHTML+=`<a class="stop-link" href="${s.link}" target="_blank">${t('learn_more_people')}</a>`;
+    if(s.link2) le.innerHTML+=`<a class="stop-link" href="${s.link2}" target="_blank">${t('more_info')}</a>`;
     if(s.addr) le.innerHTML+=`<a class="maps-export-btn" href="${s.lat&&s.lng?`https://maps.google.com/?q=${s.lat},${s.lng}`:`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.addr)}`}" target="_blank"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z" fill="#EA4335"/></svg>Maps</a>`;
   } else if(s.cat==='Film'){
     if(s.film) le.innerHTML+=`<div style="font-size:12px;font-weight:600;color:#C17F24;margin-bottom:4px">🎬 ${s.film}${s.year?' ('+s.year+')':''}</div>`;
@@ -1334,7 +1362,7 @@ function showSheet(s){
     if(s.dates) le.innerHTML+=`<div style="font-size:11px;color:var(--muted);margin-bottom:6px">📅 ${s.dates}</div>`;
     if(s.addr) le.innerHTML+=`<a class="maps-export-btn" href="${s.lat&&s.lng?`https://maps.google.com/?q=${s.lat},${s.lng}`:`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.addr)}`}" target="_blank"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z" fill="#EA4335"/></svg>Maps</a>`;
   } else if(s.cat==='GreenSpace'){
-    if(s.hours) le.innerHTML+=`<div style="font-size:12px;color:var(--muted);margin-bottom:6px">🕐 ${s.hours}</div>`;
+    if(s.hours) le.innerHTML+=`<div style="font-size:12px;color:var(--muted);margin-bottom:6px">🕐 ${hoursLabel(s.hours)}</div>`;
     if(s.link) le.innerHTML+=`<a class="stop-link" href="${s.link}" target="_blank">${t('learn_more')}</a>`;
     if(s.link2) le.innerHTML+=`<a class="stop-link" href="${s.link2}" target="_blank">📷 Instagram ↗</a>`;
     if(s.addr) le.innerHTML+=`<a class="maps-export-btn" href="${s.lat&&s.lng?`https://maps.google.com/?q=${s.lat},${s.lng}`:`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.addr)}`}" target="_blank"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z" fill="#EA4335"/></svg>Maps</a>`;
@@ -1371,7 +1399,7 @@ function showSheet(s){
 function navigateToStop(){
   const s = currentSheetStop;
   if(!s || !s.lat || !s.lng) return;
-  if(!navigator.geolocation){ alert('Location services are required for navigation.'); return; }
+  if(!navigator.geolocation){ alert(t('alert_geo')); return; }
   // Close the stop sheet
   document.getElementById('sheet').classList.remove('open');
   // Launch nav with just this single stop
@@ -1509,7 +1537,10 @@ const translations = {
     get_directions_here:'🚆 Get directions here',
     metra_schedule:'View Metra schedule', cta_planner:'CTA trip planner',
     learn_more:'Learn more ↗',
-    route_eyebrow:'Route', first_stops:'First stops',
+    wiz_step1:'Build a Route · Step 1 of 3', wiz_step2:'Build a Route · Step 2 of 3', wiz_step3:'Build a Route · Step 3 of 3', wiz_q1:'What interests you?', wiz_q1_sub:'Select one or more — or pick ⭐ for the full intro', wiz_q2:'How much time do you have?', wiz_th_none:'⭐ Just show me Pullman', wiz_th_people:'👤 People of Pullman', wiz_th_arch:'🏛 Architecture', wiz_th_rail:'🚂 Railroad', wiz_th_strike:'✊ Pullman Strike', wiz_th_green:'🌳 Green Spaces', wiz_th_film:'🎬 Film', wiz_th_vets:'🎖 Veterans', wiz_th_art:'🎨 Public Art', wiz_t45:'Core essentials', wiz_t90:'Essentials + interest', wiz_t180:'Full experience', wiz_today:'Visiting today?', wiz_today_sub:'Skip stops that are currently closed', wiz_next:'Next →', wiz_cancel:'Cancel', wiz_back:'← Back', wiz_preview:'Preview on Map →', bpb_label:'Route Preview', bpb_edit:'← Edit', bpb_walk:'🧭 Walk', bpb_save:'Save →', nav_locating:'📍 Getting your location…', nav_arrived:'You\'ve arrived', nav_continue:'Continue →', nav_next_stop:'Next Stop', nav_end:'End', dir_quick:'⚡ QUICK ROUTES', qr_essential:'⭐ Essential Pullman', qr_art:'🎨 Public Art', qr_people:'👤 People', qr_arch:'🏛 Architecture', qr_rail:'🚂 Railroad', qr_strike:'✊ Pullman Strike', qr_green:'🌳 Green Spaces', qr_vets:'🎖 Veterans', qr_film:'🎬 Film', dir_distance:'Distance', dir_walking:'Walking', dir_stops:'Stops', walk_trail:'Walk the Trail', inapp_nav:'In-app navigation', drive_or_walk:'Driving or walking', pk_all:'All', pk_landmarks:'Landmarks', pk_museums:'Museums', pk_transit:'Transit', pk_art:'🎨 Art', pk_green:'🌳 Green', pk_vets:'🎖 Veterans', pk_film:'🎬 Film', add_stops:'Add stops', demo_now:'2015–now', then_head:'then head', final_stop:'final stop', segment:'Segment', of_word:'of', learn_more_people:'🔗 Learn more ↗', more_info:'🔗 More info ↗', stop_one:'stop', stop_many:'stops', tap_explore:'tap any to explore', skipped_closed:'skipped (currently closed)', n_more_short:'more', away:'away', head:'head', getting_location:'Getting your location…', stop_x_of:'Stop', last_stop:'Last Stop', finish:'Finish ✓', next_btn:'Next →', alert_min2:'Add at least 2 stops to navigate.', alert_min2b:'Add at least 2 stops to your route before starting navigation.', alert_geo:'Location services are required for navigation.', your_location:'Your Location',
+    locate_short:'I\'m here', locate_finding:'Finding',
+    list_showing:'Showing', list_of:'of', list_stops:'stops', theme_all:'All', theme_industry:'🏭 Industry & Innovation', theme_organizing:'✊ Organizing & Activism', theme_culture:'🎭 Culture & Identity', build_route_btn:'✦ Build Route',
+    route_eyebrow:'Route', first_stops:'First stops', route_view_map:'View on map', route_edit_directions:'Edit in Directions →', route_close:'Close', route_swipe_hint:'Swipe down to close',
     begin_tour:'Begin Tour →', not_now:'Not now',
     n_more:'more',
     demo_title:'📊 Demographics', demo_sub:'Racial composition of the Pullman neighborhood over time',
@@ -1560,7 +1591,10 @@ const translations = {
     get_directions_here:'🚆 Cómo llegar aquí',
     metra_schedule:'Ver horario de Metra', cta_planner:'Planificador de viajes de la CTA',
     learn_more:'Más información ↗',
-    route_eyebrow:'Ruta', first_stops:'Primeras paradas',
+    wiz_step1:'Crear una ruta · Paso 1 de 3', wiz_step2:'Crear una ruta · Paso 2 de 3', wiz_step3:'Crear una ruta · Paso 3 de 3', wiz_q1:'¿Qué te interesa?', wiz_q1_sub:'Elige uno o más, o toca ⭐ para la introducción completa', wiz_q2:'¿Cuánto tiempo tienes?', wiz_th_none:'⭐ Solo muéstrame Pullman', wiz_th_people:'👤 Personas de Pullman', wiz_th_arch:'🏛 Arquitectura', wiz_th_rail:'🚂 Ferrocarril', wiz_th_strike:'✊ Huelga Pullman', wiz_th_green:'🌳 Espacios verdes', wiz_th_film:'🎬 Cine', wiz_th_vets:'🎖 Veteranos', wiz_th_art:'🎨 Arte público', wiz_t45:'Lo esencial', wiz_t90:'Lo esencial + tus intereses', wiz_t180:'Experiencia completa', wiz_today:'¿Visitas hoy?', wiz_today_sub:'Omitir paradas que estén cerradas ahora', wiz_next:'Siguiente →', wiz_cancel:'Cancelar', wiz_back:'← Atrás', wiz_preview:'Ver en el mapa →', bpb_label:'Vista previa de la ruta', bpb_edit:'← Editar', bpb_walk:'🧭 Caminar', bpb_save:'Guardar →', nav_locating:'📍 Obteniendo tu ubicación…', nav_arrived:'Has llegado', nav_continue:'Continuar →', nav_next_stop:'Siguiente parada', nav_end:'Terminar', dir_quick:'⚡ RUTAS RÁPIDAS', qr_essential:'⭐ Pullman esencial', qr_art:'🎨 Arte público', qr_people:'👤 Personas', qr_arch:'🏛 Arquitectura', qr_rail:'🚂 Ferrocarril', qr_strike:'✊ Huelga Pullman', qr_green:'🌳 Espacios verdes', qr_vets:'🎖 Veteranos', qr_film:'🎬 Cine', dir_distance:'Distancia', dir_walking:'A pie', dir_stops:'Paradas', walk_trail:'Recorrer el sendero', inapp_nav:'Navegación en la app', drive_or_walk:'En auto o a pie', pk_all:'Todas', pk_landmarks:'Monumentos', pk_museums:'Museos', pk_transit:'Transporte público', pk_art:'🎨 Arte', pk_green:'🌳 Verde', pk_vets:'🎖 Veteranos', pk_film:'🎬 Cine', add_stops:'Agregar paradas', demo_now:'2015–hoy', then_head:'luego dirígete al', final_stop:'última parada', segment:'Tramo', of_word:'de', learn_more_people:'🔗 Más información ↗', more_info:'🔗 Más detalles ↗', stop_one:'parada', stop_many:'paradas', tap_explore:'toca cualquiera para explorar', skipped_closed:'omitidas (cerradas ahora)', n_more_short:'más', away:'de distancia', head:'dirígete al', getting_location:'Obteniendo tu ubicación…', stop_x_of:'Parada', last_stop:'Última parada', finish:'Terminar ✓', next_btn:'Siguiente →', alert_min2:'Agrega al menos 2 paradas para navegar.', alert_min2b:'Agrega al menos 2 paradas a tu ruta antes de iniciar la navegación.', alert_geo:'Se requieren los servicios de ubicación para navegar.', your_location:'Tu ubicación',
+    locate_short:'Estoy aquí', locate_finding:'Buscando',
+    list_showing:'Mostrando', list_of:'de', list_stops:'paradas', theme_all:'Todas', theme_industry:'🏭 Industria e innovación', theme_organizing:'✊ Organización y activismo', theme_culture:'🎭 Cultura e identidad', build_route_btn:'✦ Crear ruta',
+    route_eyebrow:'Ruta', first_stops:'Primeras paradas', route_view_map:'Ver en el mapa', route_edit_directions:'Editar en Cómo llegar →', route_close:'Cerrar', route_swipe_hint:'Desliza hacia abajo para cerrar',
     begin_tour:'Comenzar recorrido →', not_now:'Ahora no',
     n_more:'más',
     demo_title:'📊 Demografía', demo_sub:'Composición racial del vecindario de Pullman a lo largo del tiempo',
@@ -1759,6 +1793,7 @@ function t2(key){ return t(key); } // alias used in renderPlanView
 
 function applyLang(){
   document.documentElement.lang = currentLang==='es' ? 'es' : 'en';
+  if(typeof updateRouteBtnLabel==='function') try{ updateRouteBtnLabel(); }catch(e){}
   // Update all data-i18n elements
   document.querySelectorAll('[data-i18n]').forEach(el=>{
     const key=el.dataset.i18n;
@@ -2735,18 +2770,18 @@ function renderPlanContent(){
   if(tipsEl) tipsEl.innerHTML = `<div class="tip-list">${planContent.tips[lang].map(tip=>`<div class="tip-item">${tip}</div>`).join('')}</div>`;
 }
 const stopTimes = [
-  {id:'visitor-center',    dur:'45–60 min', tip:'Start here. Rangers can orient you and suggest a walking order. Free entry.'},
-  {id:'pullman-car-works', dur:'15–20 min', tip:'Exterior viewing and interpretive signage. The factory scale is impressive from outside.'},
-  {id:'exhibit-hall',      dur:'30–45 min', tip:'Free admission. Great exhibits on labor history and neighborhood life. Allow time to browse.'},
-  {id:'house-project',     dur:'60–90 min', tip:'Book in advance — daily tours at 10am. Includes the Dunbar House and a neighborhood walking tour.'},
-  {id:'hotel-florence',    dur:'15–20 min', tip:'Exterior and grounds. Check IDNR\'s website for interior tour availability.'},
-  {id:'greenstone-church', dur:'10–15 min', tip:'Admire the distinctive green stone exterior. Occasional interior access — check ahead.'},
-  {id:'market-square',     dur:'10–15 min', tip:'A quick but worthwhile stop. Great photo opportunity and a sense of the town\'s original scale.'},
-  {id:'randolph-museum',   dur:'30–45 min', tip:'Currently closed for expansion — check thepullmanportersmuseum.org for reopening updates.'},
-  {id:'artspace',          dur:'10–15 min', tip:'Check pullmanarts.org for open studio events. Worth seeing even if closed.'},
-  {id:'wheel-works',       dur:'5–10 min',  tip:'Exterior only — a great example of adaptive reuse, now affordable housing.'},
-  {id:'honeymoon-row',     dur:'10 min',    tip:'A short walk for a charming streetscape. Best as part of a self-guided stroll.'},
-  {id:'horse-stables',     dur:'5–10 min',  tip:'Home to Share Your Soles nonprofit. A living example of adaptive reuse in the neighborhood.'},
+  {id:'visitor-center',    dur:'45–60 min', tip:'Start here. Rangers can orient you and suggest a walking order. Free entry.', tip_es:'Empieza aquí. Los guardaparques pueden orientarte y sugerir un orden para recorrer. Entrada gratuita.'},
+  {id:'pullman-car-works', dur:'15–20 min', tip:'Exterior viewing and interpretive signage. The factory scale is impressive from outside.', tip_es:'Vista exterior y señalización interpretativa. La escala de la fábrica impresiona desde afuera.'},
+  {id:'exhibit-hall',      dur:'30–45 min', tip:'Free admission. Great exhibits on labor history and neighborhood life. Allow time to browse.', tip_es:'Entrada gratuita. Excelentes exhibiciones sobre historia laboral y la vida del vecindario. Date tiempo para recorrerlas.'},
+  {id:'house-project',     dur:'60–90 min', tip:'Book in advance — daily tours at 10am. Includes the Dunbar House and a neighborhood walking tour.', tip_es:'Reserva con anticipación: recorridos diarios a las 10am. Incluye la Casa Dunbar y una caminata por el vecindario.'},
+  {id:'hotel-florence',    dur:'15–20 min', tip:'Exterior and grounds. Check IDNR\'s website for interior tour availability.', tip_es:'Exterior y terrenos. Consulta el sitio web del IDNR para ver si hay recorridos interiores.'},
+  {id:'greenstone-church', dur:'10–15 min', tip:'Admire the distinctive green stone exterior. Occasional interior access — check ahead.', tip_es:'Admira el distintivo exterior de piedra verde. A veces se puede entrar; consulta antes.'},
+  {id:'market-square',     dur:'10–15 min', tip:'A quick but worthwhile stop. Great photo opportunity and a sense of the town\'s original scale.', tip_es:'Una parada breve pero valiosa. Buena oportunidad para fotos y para sentir la escala original del pueblo.'},
+  {id:'randolph-museum',   dur:'30–45 min', tip:'Currently closed for expansion — check thepullmanportersmuseum.org for reopening updates.', tip_es:'Cerrado actualmente por ampliación; consulta thepullmanportersmuseum.org para saber cuándo reabre.'},
+  {id:'artspace',          dur:'10–15 min', tip:'Check pullmanarts.org for open studio events. Worth seeing even if closed.', tip_es:'Consulta pullmanarts.org para eventos de estudios abiertos. Vale la pena verlo aunque esté cerrado.'},
+  {id:'wheel-works',       dur:'5–10 min',  tip:'Exterior only — a great example of adaptive reuse, now affordable housing.', tip_es:'Solo exterior: un gran ejemplo de reutilización adaptativa, hoy vivienda asequible.'},
+  {id:'honeymoon-row',     dur:'10 min',    tip:'A short walk for a charming streetscape. Best as part of a self-guided stroll.', tip_es:'Una caminata corta por un encantador paisaje urbano. Ideal como parte de un paseo por tu cuenta.'},
+  {id:'horse-stables',     dur:'5–10 min',  tip:'Home to Share Your Soles nonprofit. A living example of adaptive reuse in the neighborhood.', tip_es:'Sede de la organización sin fines de lucro Share Your Soles. Un ejemplo vivo de reutilización adaptativa en el vecindario.'},
 ];
 
 function renderPlanView(){
@@ -2766,7 +2801,7 @@ function renderPlanView(){
       <div class="time-info">
         <div class="time-name">${name}</div>
         <div class="time-dur">⏱ ${t.dur}</div>
-        <div class="time-tip">${t.tip}</div>
+        <div class="time-tip">${currentLang==='es'&&t.tip_es?t.tip_es:t.tip}</div>
       </div>`;
     div.addEventListener('click', ()=>{ showSheet(s); });
     cards.appendChild(div);
@@ -2799,10 +2834,10 @@ function updateProgressBadge(){
 function locateMe(){
   const btn=document.getElementById('locate-btn');
   if(!navigator.geolocation){alert('Location not supported on this device.');return;}
-  btn.innerHTML='<span style="font-size:18px;line-height:1">⌛</span><span style="font-size:9px;font-weight:600;line-height:1;margin-top:1px">Finding</span>';btn.classList.add('locating');
+  btn.innerHTML='<span style="font-size:18px;line-height:1">⌛</span><span style="font-size:9px;font-weight:600;line-height:1;margin-top:1px">'+t('locate_finding')+'</span>';btn.classList.add('locating');
   navigator.geolocation.getCurrentPosition(pos=>{
     userLat=pos.coords.latitude;userLng=pos.coords.longitude;
-    btn.innerHTML='<span style="font-size:18px;line-height:1">📍</span><span style="font-size:9px;font-weight:600;line-height:1;margin-top:1px">I\'m here</span>';btn.classList.remove('locating');
+    btn.innerHTML='<span style="font-size:18px;line-height:1">📍</span><span style="font-size:9px;font-weight:600;line-height:1;margin-top:1px" data-i18n="locate_short">'+t('locate_short')+'</span>';btn.classList.remove('locating');
     if(userMarker) userMarker.remove();
     const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="#185FA5" opacity="0.25"/><circle cx="10" cy="10" r="5" fill="#185FA5"/><circle cx="10" cy="10" r="2.5" fill="white"/></svg>`;
     userMarker=L.marker([userLat,userLng],{
@@ -2812,7 +2847,7 @@ function locateMe(){
     map.setView([userLat,userLng],15);
     renderList(); // refresh walk times
   },err=>{
-    btn.innerHTML='<span style="font-size:18px;line-height:1">📍</span><span style="font-size:9px;font-weight:600;line-height:1;margin-top:1px">I\'m here</span>';btn.classList.remove('locating');
+    btn.innerHTML='<span style="font-size:18px;line-height:1">📍</span><span style="font-size:9px;font-weight:600;line-height:1;margin-top:1px" data-i18n="locate_short">'+t('locate_short')+'</span>';btn.classList.remove('locating');
     alert('Could not get your location. Please check your location permissions.');
   },{enableHighAccuracy:true,timeout:10000});
 }
@@ -2989,7 +3024,7 @@ function renderBuiltRoute(){
       <div class="built-num">${i+1}</div>
       <div class="built-info">
         <div class="built-name">${s.name}</div>
-        <div class="built-meta">${s.cat}${dist?` · then head ${dir} ${dist.toFixed(2)} mi`:' · final stop'}</div>
+        <div class="built-meta">${catLabel(s.cat)}${dist?` · ${t('then_head')} ${dirLabel(dir)} ${dist.toFixed(2)} mi`:' · '+t('final_stop')}</div>
       </div>
       <div class="built-actions">
         <button class="built-btn" onclick="moveStop(${i},-1)" aria-label="Move up" ${i===0?'style="opacity:.3;pointer-events:none"':''}>↑</button>
@@ -3008,7 +3043,7 @@ function renderBuiltRoute(){
     const hasLocation = userLat !== null && userLng !== null;
     // Build the full ordered point list (user location + all stops)
     const allPts = hasLocation
-      ? [{lat:userLat,lng:userLng,name:'Your Location'}, ...stopsArr]
+      ? [{lat:userLat,lng:userLng,name:t('your_location')}, ...stopsArr]
       : stopsArr;
     return mapsLegUrls(allPts);
   };
@@ -3018,19 +3053,19 @@ function renderBuiltRoute(){
     mapsLinkEl.href = mapsLegs[0] || '#';
     // Reset subtitle in case it was previously set to a segment count
     const mapsSubLabel = mapsLinkEl.querySelector('span:last-child');
-    if(mapsSubLabel) mapsSubLabel.textContent = 'Driving or walking';
+    if(mapsSubLabel) mapsSubLabel.textContent = t('drive_or_walk');
     const old = document.getElementById('maps-extra-legs');
     if(old){ old.style.display = 'none'; old.innerHTML = ''; }
   } else {
     mapsLinkEl.href = mapsLegs[0];
     // Update card subtitle to show segment count
     const mapsSubLabel = mapsLinkEl.querySelector('span:last-child');
-    if(mapsSubLabel) mapsSubLabel.textContent = `Segment 1 of ${mapsLegs.length}`;
+    if(mapsSubLabel) mapsSubLabel.textContent = `${t('segment')} 1 ${t('of_word')} ${mapsLegs.length}`;
     const extraEl = document.getElementById('maps-extra-legs');
     if(extraEl){
       extraEl.style.display = 'flex';
       extraEl.innerHTML = mapsLegs.slice(1).map((url,idx)=>
-        `<a href="${url}" target="_blank" style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 10px;background:var(--bg2);border-radius:8px;border:1px solid var(--border)">🗺 Google Maps — Segment ${idx+2} of ${mapsLegs.length} ↗</a>`
+        `<a href="${url}" target="_blank" style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 10px;background:var(--bg2);border-radius:8px;border:1px solid var(--border)">🗺 Google Maps — ${t('segment')} ${idx+2} ${t('of_word')} ${mapsLegs.length} ↗</a>`
       ).join('');
     }
   }
@@ -3215,6 +3250,16 @@ function showRouteSheet(routeKey){
   if(eyebrow) eyebrow.textContent = t('route_eyebrow');
   const stopsLabel = document.querySelector('.route-sheet-stops-label');
   if(stopsLabel) stopsLabel.textContent = t('first_stops');
+  const vmLabel = document.getElementById('route-sheet-view-map-label');
+  if(vmLabel) vmLabel.textContent = t('route_view_map');
+  const editBtn = document.getElementById('route-sheet-btn-directions');
+  if(editBtn) editBtn.textContent = t('route_edit_directions');
+  const closeBtn = document.getElementById('route-sheet-close');
+  if(closeBtn) closeBtn.setAttribute('aria-label', t('route_close'));
+  const handleRow = document.querySelector('.route-sheet-handle-row');
+  if(handleRow) handleRow.title = t('route_swipe_hint');
+  const sheetEl = document.getElementById('route-info-sheet');
+  if(sheetEl){ sheetEl.style.transform = ''; sheetEl.classList.remove('dragging'); sheetEl.scrollTop = 0; }
   // Show stops section only if there are named stops
   document.getElementById('route-sheet-stops-section').style.display = firstStops.length ? 'block' : 'none';
   // Open
@@ -3223,9 +3268,55 @@ function showRouteSheet(routeKey){
 }
 
 function dismissRouteSheet(){
-  document.getElementById('route-info-sheet').classList.remove('open');
+  const sheet = document.getElementById('route-info-sheet');
+  sheet.classList.remove('open','dragging');
+  sheet.style.transform = '';
   document.getElementById('route-sheet-backdrop').classList.remove('visible');
 }
+
+// Close the intro and frame every stop of the active route on the map
+function viewRouteOnMap(){
+  dismissRouteSheet();
+  const mapBtn = document.querySelector('.nav-btn[data-view="map"]');
+  if(mapBtn && !mapBtn.classList.contains('active')) mapBtn.click();
+  const route = activeRoute && routes[activeRoute];
+  if(!route || !map) return;
+  const pts = route.stops.map(id=>stops.find(s=>s.id===id)).filter(s=>s&&s.lat&&s.lng).map(s=>[s.lat,s.lng]);
+  if(pts.length){
+    setTimeout(()=>{ map.invalidateSize(); map.fitBounds(L.latLngBounds(pts),{padding:[50,50]}); }, 60);
+  }
+}
+
+// Swipe the route intro down to dismiss it (the sheet markup sits at the end of <body>)
+function initRouteSheetSwipe(){
+  const sheet = document.getElementById('route-info-sheet');
+  if(!sheet) return;
+  let startY = null, dy = 0;
+  sheet.addEventListener('touchstart', e=>{
+    const onHandle = !!e.target.closest('.route-sheet-handle-row');
+    if(!onHandle && sheet.scrollTop > 0) { startY = null; return; }
+    if(e.target.closest('button,a') && !onHandle) { startY = null; return; }
+    startY = e.touches[0].clientY; dy = 0;
+  }, {passive:true});
+  sheet.addEventListener('touchmove', e=>{
+    if(startY === null) return;
+    dy = e.touches[0].clientY - startY;
+    if(dy <= 0){ sheet.classList.remove('dragging'); sheet.style.transform = ''; return; }
+    if(sheet.scrollTop > 0) return;
+    sheet.classList.add('dragging');
+    sheet.style.transform = `translateX(-50%) translateY(${dy}px)`;
+  }, {passive:true});
+  const end = ()=>{
+    if(startY === null) return;
+    sheet.classList.remove('dragging');
+    if(dy > 70) dismissRouteSheet(); else sheet.style.transform = '';
+    startY = null; dy = 0;
+  };
+  sheet.addEventListener('touchend', end);
+  sheet.addEventListener('touchcancel', end);
+}
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initRouteSheetSwipe);
+else initRouteSheetSwipe();
 
 // ── Send Route to Directions Tab ───────────────────────────────────────────
 function sendRouteToDirections(){
@@ -3403,15 +3494,15 @@ function interestGoStep2(){
   if(timeNextBtn) timeNextBtn.disabled = !interestSelectedMinutes;
 }
 
+function interestThemeLabels(){
+  return currentLang==='es'
+    ? {'none':'Pullman esencial','public-art':'Arte público','people':'Personas de Pullman','architecture':'Arquitectura','strike':'Huelga Pullman','railroad':'Ferrocarril','green-spaces':'Espacios verdes','film':'Locaciones de cine','veterans':'Veteranos'}
+    : {'none':'Essential Pullman','public-art':'Public Art','people':'People of Pullman','architecture':'Architecture','strike':'Pullman Strike','railroad':'Railroad','green-spaces':'Green Spaces','film':'Film Locations','veterans':'Veterans'};
+}
 function interestGoStep3(){
   if(!interestSelectedMinutes) return;
 
-  const themeLabels = {
-    'none':'Essential Pullman','public-art':'Public Art',
-    'people':'People of Pullman','architecture':'Architecture','strike':'Pullman Strike',
-    'railroad':'Railroad','green-spaces':'Green Spaces',
-    'film':'Film Locations','veterans':'Veterans'
-  };
+  const themeLabels = interestThemeLabels();
   const timeLabels = { 45:'45 min', 90:'90 min', 180:'3+ hrs' };
   const maxStops = maxStopsByTime[interestSelectedMinutes] || 999;
 
@@ -3442,17 +3533,17 @@ function interestGoStep3(){
   builderPreviewStops = resolvedAll.filter(s => isStopOpenForBuilder(s));
 
   // Title: list selected theme names
-  const selectedLabels = [...interestSelectedThemes].map(t => themeLabels[t] || t).join(' + ');
+  const selectedLabels = [...interestSelectedThemes].map(k => themeLabels[k] || k).join(' + ');
   document.getElementById('interest-preview-title').textContent =
     `${selectedLabels} · ${timeLabels[interestSelectedMinutes]}`;
 
   document.getElementById('interest-preview-meta').textContent =
-    `${builderPreviewStops.length} stop${builderPreviewStops.length !== 1 ? 's' : ''}`;
+    `${builderPreviewStops.length} ${t(builderPreviewStops.length !== 1 ? 'stop_many' : 'stop_one')}`;
 
   const noteEl = document.getElementById('interest-preview-closed-note');
   if(excluded.length > 0){
     const names = excluded.map(s=>s.name).join(', ');
-    noteEl.textContent = `🔒 ${excluded.length} stop${excluded.length!==1?'s':''} skipped (currently closed): ${names}`;
+    noteEl.textContent = `🔒 ${excluded.length} ${t(excluded.length!==1?'stop_many':'stop_one')} ${t('skipped_closed')}: ${names}`;
     noteEl.style.display = 'block';
   } else {
     noteEl.style.display = 'none';
@@ -3462,7 +3553,7 @@ function interestGoStep3(){
   const chipsEl = document.getElementById('interest-preview-chips');
   chipsEl.innerHTML = builderPreviewStops.slice(0,6).map(s=>`
     <span style="font-size:11px;font-weight:500;background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;padding:3px 10px;color:var(--text)">${s.name}</span>
-  `).join('') + (builderPreviewStops.length > 6 ? `<span style="font-size:11px;font-style:italic;color:var(--muted);padding:3px 6px">+${builderPreviewStops.length - 6} more</span>` : '');
+  `).join('') + (builderPreviewStops.length > 6 ? `<span style="font-size:11px;font-style:italic;color:var(--muted);padding:3px 6px">+${builderPreviewStops.length - 6} ${t('n_more_short')}</span>` : '');
 
   document.getElementById('interest-step-1').classList.remove('active');
   document.getElementById('interest-step-2').classList.remove('active');
@@ -3576,18 +3667,13 @@ function previewBuilderOnMap(){
   }
 
   // Show preview bar
-  const themeLabels = {
-    'none':'Essential Pullman','public-art':'Public Art',
-    'people':'People of Pullman','architecture':'Architecture','strike':'Pullman Strike',
-    'railroad':'Railroad','green-spaces':'Green Spaces',
-    'film':'Film Locations','veterans':'Veterans'
-  };
+  const themeLabels = interestThemeLabels();
   const timeLabels = { 45:'45 min', 90:'90 min', 180:'3+ hrs' };
-  const selectedLabels = [...interestSelectedThemes].map(t => themeLabels[t] || t).join(' + ');
+  const selectedLabels = [...interestSelectedThemes].map(k => themeLabels[k] || k).join(' + ');
   document.getElementById('bpb-title').textContent =
     `${selectedLabels} · ${timeLabels[interestSelectedMinutes] || ''}`;
   document.getElementById('bpb-meta').textContent =
-    `${builderPreviewStops.length} stop${builderPreviewStops.length !== 1 ? 's' : ''} · tap any to explore`;
+    `${builderPreviewStops.length} ${t(builderPreviewStops.length !== 1 ? 'stop_many' : 'stop_one')} · ${t('tap_explore')}`;
   const bar = document.getElementById('builder-preview-bar');
   bar.classList.add('active');
 
@@ -3625,7 +3711,7 @@ function confirmBuilderRoute(){
 
 function startNavFromBuilderPreview(){
   if(!builderPreviewStops || builderPreviewStops.length < 2){
-    alert('Add at least 2 stops to navigate.');
+    alert(t('alert_min2'));
     return;
   }
   // Hide preview bar and markers — nav takes over the map
@@ -3665,7 +3751,7 @@ function startNavigationFromSheet(){
 // Start nav from the Directions tab's custom-built route
 function startNavigationFromDirections(){
   if(!customRoute || customRoute.length < 2){
-    alert('Add at least 2 stops to your route before starting navigation.');
+    alert(t('alert_min2b'));
     return;
   }
   // Switch to Navigate tab FIRST so the map is visible and initialized before nav tries to use it
@@ -3678,7 +3764,7 @@ function startNavigationFromDirections(){
 // Core nav launcher that accepts a raw stops array (no route key needed)
 function startNavigationWithStops(stopsArr, color){
   if(!stopsArr || stopsArr.length < 1) return;
-  if(!navigator.geolocation){ alert('Location services are required for navigation.'); return; }
+  if(!navigator.geolocation){ alert(t('alert_geo')); return; }
   navRouteKey = '__custom__';
   navRouteColor = color;
   const rawStops = stopsArr.filter(s => s.lat && s.lng);
@@ -3759,7 +3845,7 @@ function nearestNeighborSort(stopsArr, startLat, startLng){
 
 function startNavigation(routeKey){
   if(!routeKey || !routes[routeKey]) return;
-  if(!navigator.geolocation){ alert('Location services are required for navigation.'); return; }
+  if(!navigator.geolocation){ alert(t('alert_geo')); return; }
   navRouteKey = routeKey;
   const route = routes[routeKey];
   navRouteColor = route.color;
@@ -3955,11 +4041,11 @@ function updateNavBar(){
   // Distance to current target stop
   if(userLat !== null){
     const distM = haversineMeters(userLat,userLng,stop.lat,stop.lng);
-    const distText = distM < 160 ? `${Math.round(distM)}m away` : `${(distM*0.000621371).toFixed(2)} mi away`;
+    const distText = distM < 160 ? `${Math.round(distM)}m ${t('away')}` : `${(distM*0.000621371).toFixed(2)} mi ${t('away')}`;
     const bearing = cardinalBearing(userLat,userLng,stop.lat,stop.lng);
-    document.getElementById('nav-stop-dist').textContent = `${distText} · head ${bearing}`;
+    document.getElementById('nav-stop-dist').textContent = `${distText} · ${t('head')} ${dirLabel(bearing)}`;
   } else {
-    document.getElementById('nav-stop-dist').textContent = 'Getting your location…';
+    document.getElementById('nav-stop-dist').textContent = t('getting_location');
   }
   // Progress bar
   const pct = (navStopIndex / total) * 100;
@@ -3967,10 +4053,10 @@ function updateNavBar(){
   // Label: "Stop X of N" (or "Last Stop" on the final one)
   const isLast = navStopIndex === total - 1;
   document.getElementById('nav-next-label').textContent =
-    isLast ? `Last Stop (${total} of ${total})` : `Stop ${navStopIndex + 1} of ${total}`;
+    isLast ? `${t('last_stop')} (${total} ${t('of_word')} ${total})` : `${t('stop_x_of')} ${navStopIndex + 1} ${t('of_word')} ${total}`;
   // Rename Next button on last stop
   const nextBtn = document.getElementById('nav-next-btn');
-  if(nextBtn) nextBtn.textContent = isLast ? 'Finish ✓' : 'Next →';
+  if(nextBtn) nextBtn.textContent = isLast ? t('finish') : t('next_btn');
 }
 
 function haversineMeters(lat1,lng1,lat2,lng2){
@@ -4067,7 +4153,7 @@ document.addEventListener('DOMContentLoaded',()=>{
       <div class="demo-event"><div class="demo-event-year">1973–80</div><div class="demo-event-text" id="demo-ev-1973">In 1975 the Historic Pullman Foundation buys the Hotel Florence to save it from demolition. In 1980 Wisconsin Steel in nearby South Deering closes abruptly, costing thousands of jobs, and other Calumet mills follow. Unemployment rises across the Far South Side.</div></div>
       <div class="demo-event"><div class="demo-event-year">1980s–90s</div><div class="demo-event-text" id="demo-ev-1980">Disinvestment deepens as mills close, businesses leave, and population falls. In 1981 the Pullman car plant closes for good. In 1991 the State of Illinois takes title to the Hotel Florence, now part of a state historic site.</div></div>
       <div class="demo-event"><div class="demo-event-year">2000s</div><div class="demo-event-text" id="demo-ev-2000">Residents, preservationists, and community groups keep restoring homes and press for federal recognition, building the case that leads to national monument status.</div></div>
-      <div class="demo-event"><div class="demo-event-year">2015–now</div><div class="demo-event-text" id="demo-ev-2015">On February 19, 2015, President Obama designates Pullman a National Monument. Method Products opens a soap factory on a former steel mill site on 111th Street, the neighborhood's first new manufacturing plant in about 30 years. The National Park Service visitor center opens in the restored Administration Building in 2021, and in December 2022 Pullman becomes a National Historical Park.</div></div>
+      <div class="demo-event"><div class="demo-event-year" data-i18n="demo_now">2015–now</div><div class="demo-event-text" id="demo-ev-2015">On February 19, 2015, President Obama designates Pullman a National Monument. Method Products opens a soap factory on a former steel mill site on 111th Street, the neighborhood's first new manufacturing plant in about 30 years. The National Park Service visitor center opens in the restored Administration Building in 2021, and in December 2022 Pullman becomes a National Historical Park.</div></div>
     </div>
     <div id="demo-source" style="margin-top:14px;padding-top:12px;border-top:0.5px solid var(--border);font-size:10px;color:var(--muted);line-height:1.5">
       Sources: U.S. Census Bureau decennial census; CMAP Community Data Snapshots; Big Shoulders Atlas (2011). Figures reflect the Pullman community area (tracts 5001–5003). The national park boundary covers a subset of this area.
@@ -4090,23 +4176,23 @@ document.addEventListener('DOMContentLoaded',()=>{
         <div class="interest-step-dot"></div>
         <div class="interest-step-dot"></div>
       </div>
-      <div class="interest-sheet-eyebrow">Build a Route · Step 1 of 3</div>
-      <div class="interest-sheet-title">What interests you?</div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:10px;margin-top:-8px">Select one or more — or pick ⭐ for the full intro</div>
+      <div class="interest-sheet-eyebrow" data-i18n="wiz_step1">Build a Route · Step 1 of 3</div>
+      <div class="interest-sheet-title" data-i18n="wiz_q1">What interests you?</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px;margin-top:-8px" data-i18n="wiz_q1_sub">Select one or more — or pick ⭐ for the full intro</div>
       <div class="interest-theme-grid" id="interest-theme-grid">
-        <button class="interest-theme-card" data-theme="none" onclick="selectInterestTheme(this)">⭐ Just show me Pullman</button>
-        <button class="interest-theme-card" data-theme="public-art" onclick="selectInterestTheme(this)">🎨 Public Art</button>
-        <button class="interest-theme-card" data-theme="people" onclick="selectInterestTheme(this)">👤 People of Pullman</button>
-        <button class="interest-theme-card" data-theme="architecture" onclick="selectInterestTheme(this)">🏛 Architecture</button>
-        <button class="interest-theme-card" data-theme="railroad" onclick="selectInterestTheme(this)">🚂 Railroad</button>
-        <button class="interest-theme-card" data-theme="strike" onclick="selectInterestTheme(this)">✊ Pullman Strike</button>
-        <button class="interest-theme-card" data-theme="green-spaces" onclick="selectInterestTheme(this)">🌳 Green Spaces</button>
-        <button class="interest-theme-card" data-theme="film" onclick="selectInterestTheme(this)">🎬 Film</button>
-        <button class="interest-theme-card" data-theme="veterans" onclick="selectInterestTheme(this)">🎖 Veterans</button>
+        <button class="interest-theme-card" data-theme="none" onclick="selectInterestTheme(this)" data-i18n="wiz_th_none">⭐ Just show me Pullman</button>
+        <button class="interest-theme-card" data-theme="public-art" onclick="selectInterestTheme(this)" data-i18n="wiz_th_art">🎨 Public Art</button>
+        <button class="interest-theme-card" data-theme="people" onclick="selectInterestTheme(this)" data-i18n="wiz_th_people">👤 People of Pullman</button>
+        <button class="interest-theme-card" data-theme="architecture" onclick="selectInterestTheme(this)" data-i18n="wiz_th_arch">🏛 Architecture</button>
+        <button class="interest-theme-card" data-theme="railroad" onclick="selectInterestTheme(this)" data-i18n="wiz_th_rail">🚂 Railroad</button>
+        <button class="interest-theme-card" data-theme="strike" onclick="selectInterestTheme(this)" data-i18n="wiz_th_strike">✊ Pullman Strike</button>
+        <button class="interest-theme-card" data-theme="green-spaces" onclick="selectInterestTheme(this)" data-i18n="wiz_th_green">🌳 Green Spaces</button>
+        <button class="interest-theme-card" data-theme="film" onclick="selectInterestTheme(this)" data-i18n="wiz_th_film">🎬 Film</button>
+        <button class="interest-theme-card" data-theme="veterans" onclick="selectInterestTheme(this)" data-i18n="wiz_th_vets">🎖 Veterans</button>
       </div>
       <div class="interest-sheet-actions">
-        <button class="interest-sheet-btn-generate" id="interest-next-btn" disabled onclick="interestGoStep2()">Next →</button>
-        <button class="interest-sheet-btn-back" onclick="dismissInterestSheet()">Cancel</button>
+        <button class="interest-sheet-btn-generate" id="interest-next-btn" disabled onclick="interestGoStep2()" data-i18n="wiz_next">Next →</button>
+        <button class="interest-sheet-btn-back" onclick="dismissInterestSheet()" data-i18n="wiz_cancel">Cancel</button>
       </div>
     </div>
 
@@ -4117,18 +4203,18 @@ document.addEventListener('DOMContentLoaded',()=>{
         <div class="interest-step-dot active"></div>
         <div class="interest-step-dot"></div>
       </div>
-      <div class="interest-sheet-eyebrow">Build a Route · Step 2 of 3</div>
-      <div class="interest-sheet-title">How much time do you have?</div>
+      <div class="interest-sheet-eyebrow" data-i18n="wiz_step2">Build a Route · Step 2 of 3</div>
+      <div class="interest-sheet-title" data-i18n="wiz_q2">How much time do you have?</div>
       <div class="interest-time-row">
-        <button class="interest-time-btn" data-minutes="45" onclick="selectInterestTime(this)">⚡<br><strong>45 min</strong><br><span style="font-size:10px;font-weight:400">Core essentials</span></button>
-        <button class="interest-time-btn" data-minutes="90" onclick="selectInterestTime(this)">🕑<br><strong>90 min</strong><br><span style="font-size:10px;font-weight:400">Essentials + interest</span></button>
-        <button class="interest-time-btn" data-minutes="180" onclick="selectInterestTime(this)">☀️<br><strong>3+ hrs</strong><br><span style="font-size:10px;font-weight:400">Full experience</span></button>
+        <button class="interest-time-btn" data-minutes="45" onclick="selectInterestTime(this)">⚡<br><strong>45 min</strong><br><span style="font-size:10px;font-weight:400" data-i18n="wiz_t45">Core essentials</span></button>
+        <button class="interest-time-btn" data-minutes="90" onclick="selectInterestTime(this)">🕑<br><strong>90 min</strong><br><span style="font-size:10px;font-weight:400" data-i18n="wiz_t90">Essentials + interest</span></button>
+        <button class="interest-time-btn" data-minutes="180" onclick="selectInterestTime(this)">☀️<br><strong>3+ hrs</strong><br><span style="font-size:10px;font-weight:400" data-i18n="wiz_t180">Full experience</span></button>
       </div>
       <!-- Visiting now toggle -->
       <div style="margin:14px 0 2px;display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg2);border-radius:12px;border:1px solid var(--border)">
         <div>
-          <div style="font-size:13px;font-weight:600;color:var(--text)">Visiting today?</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:2px">Skip stops that are currently closed</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text)" data-i18n="wiz_today">Visiting today?</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px" data-i18n="wiz_today_sub">Skip stops that are currently closed</div>
         </div>
         <div style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer;flex-shrink:0" onclick="toggleVisitingNow()">
           <span id="visiting-now-track" style="position:absolute;top:0;left:0;right:0;bottom:0;background:var(--border);border-radius:12px;transition:.2s"></span>
@@ -4136,8 +4222,8 @@ document.addEventListener('DOMContentLoaded',()=>{
         </div>
       </div>
       <div class="interest-sheet-actions">
-        <button class="interest-sheet-btn-generate" id="interest-time-next-btn" disabled onclick="interestGoStep3()">Next →</button>
-        <button class="interest-sheet-btn-back" onclick="interestGoStep1()">← Back</button>
+        <button class="interest-sheet-btn-generate" id="interest-time-next-btn" disabled onclick="interestGoStep3()" data-i18n="wiz_next">Next →</button>
+        <button class="interest-sheet-btn-back" onclick="interestGoStep1()" data-i18n="wiz_back">← Back</button>
       </div>
     </div>
 
@@ -4148,14 +4234,14 @@ document.addEventListener('DOMContentLoaded',()=>{
         <div class="interest-step-dot"></div>
         <div class="interest-step-dot active"></div>
       </div>
-      <div class="interest-sheet-eyebrow">Build a Route · Step 3 of 3</div>
+      <div class="interest-sheet-eyebrow" data-i18n="wiz_step3">Build a Route · Step 3 of 3</div>
       <div class="interest-sheet-title" id="interest-preview-title">Your Route</div>
       <div id="interest-preview-meta" style="font-size:12px;color:var(--muted);margin-bottom:6px"></div>
       <div id="interest-preview-closed-note" style="display:none;font-size:11px;color:#C0392B;background:#FFF0EE;border:1px solid #FFCCC7;border-radius:8px;padding:6px 10px;margin-bottom:10px"></div>
       <div id="interest-preview-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px"></div>
       <div class="interest-sheet-actions">
-        <button class="interest-sheet-btn-generate" id="interest-generate-btn" onclick="previewBuilderOnMap()">Preview on Map →</button>
-        <button class="interest-sheet-btn-back" onclick="interestGoStep2()">← Back</button>
+        <button class="interest-sheet-btn-generate" id="interest-generate-btn" onclick="previewBuilderOnMap()" data-i18n="wiz_preview">Preview on Map →</button>
+        <button class="interest-sheet-btn-back" onclick="interestGoStep2()" data-i18n="wiz_back">← Back</button>
       </div>
     </div>
 
@@ -4164,37 +4250,37 @@ document.addEventListener('DOMContentLoaded',()=>{
 
 <div id="route-info-sheet">
   <div id="route-sheet-accent"></div>
-  <div class="route-sheet-handle-row"><div class="route-sheet-handle"></div></div>
+  <div class="route-sheet-handle-row" title="Swipe down to close"><div class="route-sheet-handle"></div><button class="route-sheet-close" id="route-sheet-close" onclick="dismissRouteSheet()" aria-label="Close">✕</button></div>
   <div class="route-sheet-inner">
-    <div class="route-sheet-eyebrow">Route</div>
+    <div class="route-sheet-eyebrow" data-i18n="route_eyebrow">Route</div>
     <div class="route-sheet-title" id="route-sheet-title"></div>
     <div class="route-sheet-meta">
       <span class="route-sheet-pill" id="route-sheet-pill"></span>
       <span style="font-size:11px;color:var(--muted)">·</span>
       <span class="route-sheet-time" id="route-sheet-time"></span>
+      <button class="route-sheet-view-map" id="route-sheet-view-map" onclick="viewRouteOnMap()"><span>🗺</span><span id="route-sheet-view-map-label">View on map</span></button>
     </div>
     <div class="route-sheet-divider"></div>
     <p class="route-sheet-desc" id="route-sheet-desc"></p>
     <div id="route-sheet-stops-section">
-      <div class="route-sheet-stops-label">First stops</div>
+      <div class="route-sheet-stops-label" data-i18n="first_stops">First stops</div>
       <div class="route-sheet-chips" id="route-sheet-chips"></div>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:10px">
       <button id="route-sheet-btn-navigate" onclick="startNavigationFromSheet()" style="font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;padding:13px 10px;border-radius:12px;border:none;background:var(--brand);color:#fff;cursor:pointer;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;line-height:1.2">
         <span style="font-size:20px">🧭</span>
-        <span>Walk the Trail</span>
-        <span style="font-size:11px;font-weight:500;opacity:.8">In-app navigation</span>
+        <span data-i18n="walk_trail">Walk the Trail</span>
+        <span style="font-size:11px;font-weight:500;opacity:.8" data-i18n="inapp_nav">In-app navigation</span>
       </button>
       <a id="route-sheet-maps-link" href="#" target="_blank" style="font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;padding:13px 10px;border-radius:12px;background:var(--bg2);color:var(--text);border:1.5px solid var(--border);text-decoration:none;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;line-height:1.2;text-align:center">
         <span style="font-size:20px">🚗</span>
         <span>Google Maps</span>
-        <span style="font-size:11px;font-weight:500;color:var(--muted)">Driving or walking</span>
+        <span style="font-size:11px;font-weight:500;color:var(--muted)" data-i18n="drive_or_walk">Driving or walking</span>
       </a>
     </div>
     <div id="route-sheet-maps-extra" style="display:none;flex-wrap:wrap;gap:6px;justify-content:flex-end;margin:-4px 0 10px"></div>
     <div style="display:flex;align-items:center;justify-content:space-between">
-      <button id="route-sheet-btn-directions" onclick="sendRouteToDirections()" style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;background:none;border:none;color:var(--muted);cursor:pointer;padding:4px 0">Edit in Directions →</button>
-      <button id="route-sheet-btn-cancel" onclick="dismissRouteSheet()" style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;background:none;border:none;color:var(--muted);cursor:pointer;padding:4px 0">Dismiss</button>
+      <button id="route-sheet-btn-directions" onclick="sendRouteToDirections()" style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;background:none;border:none;color:var(--muted);cursor:pointer;padding:4px 0" data-i18n="route_edit_directions">Edit in Directions →</button>
     </div>
     <!-- keep hidden for JS compat -->
     <button id="route-sheet-btn-start" style="display:none"></button>
