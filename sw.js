@@ -3,19 +3,27 @@
 //   immediately; the cached copy is used only when offline.
 // - Map library and map tiles: cache first, with a cap on stored tiles.
 // - Everything else (routing, weather, calendar, analytics): never cached.
-const VERSION = 'pct-v1';
+const VERSION = 'pct-v2';
 const CORE = `${VERSION}-core`;
 const TILES = `${VERSION}-tiles`;
 const MAX_TILES = 400;
 const PRECACHE = [
   './', './index.html', './hours.json', './manifest.json',
-  './icons/icon-192.png', './icons/icon-512.png',
+  './icons/icon-192.png', './icons/icon-512.png'
+];
+// Fetched best-effort: a CDN hiccup must not stop the app shell from installing.
+const PRECACHE_OPTIONAL = [
   'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js',
   'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css'
 ];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CORE).then(c => c.addAll(PRECACHE)).then(() => self.skipWaiting()));
+  e.waitUntil((async () => {
+    const c = await caches.open(CORE);
+    await c.addAll(PRECACHE);
+    await Promise.all(PRECACHE_OPTIONAL.map(u => c.add(u).catch(() => {})));
+    await self.skipWaiting();
+  })());
 });
 
 self.addEventListener('activate', e => {
