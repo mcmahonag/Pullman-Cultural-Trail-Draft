@@ -1041,6 +1041,7 @@ function mkIconActive(cat){
 
 function initMap(){
   map=L.map('map',{zoomControl:false}).setView([41.695,-87.607],14);
+  map.on('zoomend', ()=>declutterRouteMarkers());
   L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=cb1_3v85_1_0c86e15b3d682763c8c57364',{
     attribution:'© <a href="https://www.openstreetmap.org/copyright">OSM</a> © <a href="https://carto.com/">CARTO</a>',
     subdomains:'abcd',maxZoom:19
@@ -1125,6 +1126,45 @@ function renderMarkers(){
   });
   const ll=visible.filter(s=>s.lat).map(s=>[s.lat,s.lng]);
   if(ll.length)map.fitBounds(ll,{padding:[44,44]});
+  setTimeout(declutterRouteMarkers, 60);
+}
+
+// ── Route pin declutter ─────────────────────────────────────
+// When a route is active, pins whose GPS points fall within a few pixels of each
+// other at the current zoom are fanned out on screen so every stop stays visible.
+// Only the drawn icon is nudged; the stop's coordinates are never changed.
+function setMarkerNudge(m, dx, dy){
+  const el = m.getElement && m.getElement(); if(!el) return;
+  const a = (m.options.icon && m.options.icon.options && m.options.icon.options.iconAnchor) || [0,0];
+  const ax = Array.isArray(a) ? a[0] : a.x, ay = Array.isArray(a) ? a[1] : a.y;
+  el.style.marginLeft = (-ax + dx) + 'px';
+  el.style.marginTop  = (-ay + dy) + 'px';
+}
+function declutterRouteMarkers(){
+  if(!map || !markers.length) return;
+  const pts = markers.map(m => map.latLngToLayerPoint(m.getLatLng()));
+  const off = markers.map(() => [0, 0]);
+  if(activeRoute){
+    // Push apart any pins closer than MIN px on screen; cap how far a pin can drift.
+    const MIN = 20, CAP = 26;
+    for(let iter = 0; iter < 40; iter++){
+      let moved = false;
+      for(let i = 0; i < pts.length; i++) for(let j = i + 1; j < pts.length; j++){
+        let dx = (pts[j].x + off[j][0]) - (pts[i].x + off[i][0]);
+        let dy = (pts[j].y + off[j][1]) - (pts[i].y + off[i][1]);
+        let d = Math.hypot(dx, dy);
+        if(d >= MIN) continue;
+        if(d < 0.01){ const a = (i * 2.399) % (2 * Math.PI); dx = Math.cos(a); dy = Math.sin(a); d = 1; }
+        const push = (MIN - d) / 2, ux = dx / d, uy = dy / d;
+        off[i][0] -= ux * push; off[i][1] -= uy * push;
+        off[j][0] += ux * push; off[j][1] += uy * push;
+        moved = true;
+      }
+      off.forEach(o => { const m = Math.hypot(o[0], o[1]); if(m > CAP){ o[0] *= CAP / m; o[1] *= CAP / m; } });
+      if(!moved) break;
+    }
+  }
+  markers.forEach((m, k) => setMarkerNudge(m, Math.round(off[k][0]), Math.round(off[k][1])));
 }
 
 // ── Audio ────────────────────────────────────────────────────────────────────
@@ -2500,6 +2540,7 @@ function activateRoute(routeKey){
         m.setZIndexOffset(0);
       }
     });
+    declutterRouteMarkers(); // setIcon resets icon offsets, so re-apply after it
   }, 50);
   // Re-render list with route context
   renderList(routeKey);
