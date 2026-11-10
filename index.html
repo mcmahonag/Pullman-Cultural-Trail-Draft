@@ -3541,7 +3541,7 @@ function startNavigationWithStops(stopsArr, color){
   );
 }
 
-// Draw a single walking leg from one stop to the next via OSRM
+// Draw a single walking leg from one stop to the next via OSRM foot profile (FOSSGIS routing.openstreetmap.de — true pedestrian routing incl. park paths; "driving" in the path is a required placeholder)
 function _navShowRoutingFallback(fromStop, toStop){
   // Show a clearly-labeled straight-line indicator (NOT walking directions)
   if(map) navPolyline = L.polyline(
@@ -3562,7 +3562,7 @@ async function drawWalkingLeg(fromStop, toStop, color){
   const distEl = document.getElementById('nav-stop-dist');
   if(distEl) distEl.textContent = 'Getting route…';
 
-  const url = `https://router.project-osrm.org/route/v1/foot/${fromStop.lng},${fromStop.lat};${toStop.lng},${toStop.lat}?overview=full&geometries=geojson`;
+  const url = `https://routing.openstreetmap.de/routed-foot/route/v1/driving/${fromStop.lng},${fromStop.lat};${toStop.lng},${toStop.lat}?overview=full&geometries=geojson`;
   try {
     const res = await fetch(url, {signal: AbortSignal.timeout(8000)});
     const data = await res.json();
