@@ -409,7 +409,9 @@ body.font-xlarge .stop-card,.font-xlarge .place-card,.font-xlarge .time-card{lin
       </div>
     </div>
     <!-- Routes note -->
-    <div style="font-size:12px;color:rgba(255,255,255,0.75);line-height:1.6;margin-bottom:28px;max-width:320px" id="wc-routes">Use the <strong style="color:white">Routes bar</strong> on the map to explore thematic routes — Public Art, Green Spaces, Veterans Memorial, Film Locations, and more.</div>
+    <div style="font-size:12px;color:rgba(255,255,255,0.75);line-height:1.6;margin-bottom:16px;max-width:320px" id="wc-routes">Use the <strong style="color:white">Routes bar</strong> on the map to explore thematic routes — Public Art, Green Spaces, Veterans Memorial, Film Locations, and more.</div>
+    <!-- Respect note -->
+    <div id="wc-respect" style="font-size:12px;color:rgba(255,255,255,0.85);line-height:1.6;margin-bottom:24px;max-width:320px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.18);border-radius:10px;padding:10px 12px;text-align:left">🏡 <strong style="color:white">Pullman is a living neighborhood.</strong> Most homes on this trail are private residences. Please stay on public sidewalks, keep noise down, and be respectful of residents and their property.</div>
     <!-- Language toggle -->
     <div style="display:flex;gap:10px;margin-bottom:24px">
       <button onclick="setWelcomeLang('en')" id="wc-en-btn" style="font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;padding:6px 18px;border-radius:20px;border:1.5px solid white;background:white;color:#1D4E2B;cursor:pointer">English</button>
@@ -1995,6 +1997,7 @@ const welcomeContent = {
     tab3:'Directions', tab3d:'Build a custom walking route',
     tab4:'Plan Trip', tab4d:'Weather, food, events & tips',
     routes:'Use the <strong style="color:white">Routes bar</strong> on the map to explore thematic routes — Public Art, Green Spaces, Veterans Memorial, Film Locations, and more.',
+    respect:'🏡 <strong style="color:white">Pullman is a living neighborhood.</strong> Most homes on this trail are private residences. Please stay on public sidewalks, keep noise down, and be respectful of residents and their property.',
     partner:'A PARTNERSHIP WITH',
     cta:'Start Exploring →'
   },
@@ -2008,6 +2011,7 @@ const welcomeContent = {
     tab3:'Cómo llegar', tab3d:'Crea una ruta a pie personalizada',
     tab4:'Planificar', tab4d:'Clima, comida, eventos y consejos',
     routes:'Usa la <strong style="color:white">barra de Rutas</strong> en el mapa para explorar rutas temáticas — Arte Público, Espacios Verdes, Memorial de Veteranos, Locaciones de Cine, y más.',
+    respect:'🏡 <strong style="color:white">Pullman es un vecindario vivo.</strong> La mayoría de las casas de este sendero son residencias privadas. Por favor, permanece en las aceras públicas, evita hacer ruido y respeta a los residentes y sus propiedades.',
     partner:'UNA ASOCIACIÓN CON',
     cta:'Comenzar a explorar →'
   }
@@ -2027,7 +2031,7 @@ function setWelcomeLang(lang){
   set('wc-tab2',c.tab2); set('wc-tab2d',c.tab2d);
   set('wc-tab3',c.tab3); set('wc-tab3d',c.tab3d);
   set('wc-tab4',c.tab4); set('wc-tab4d',c.tab4d);
-  set('wc-routes',c.routes,true); set('wc-partner',c.partner); set('wc-cta',c.cta);
+  set('wc-routes',c.routes,true); set('wc-respect',c.respect,true); set('wc-partner',c.partner); set('wc-cta',c.cta);
   ['en','es'].forEach(l=>{
     const btn=document.getElementById('wc-'+l+'-btn');
     if(!btn) return;
