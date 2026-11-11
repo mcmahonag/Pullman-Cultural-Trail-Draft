@@ -1245,6 +1245,7 @@ function initMap(){
 
 function renderMarkers(){
   markers.forEach(m=>m.remove());markers=[];
+  clearNearbyMarkers();
   const visible=getVisible();
   visible.forEach(s=>{
     if(!s.lat||!s.lng)return;
@@ -3023,6 +3024,7 @@ function renderNearby(){
     return `<button class="np-item" onclick="pickNearby(${stops.indexOf(s)})"><span class="np-dot" style="background:${color}"></span><span class="np-main"><div class="np-name">${name}</div><div class="np-sub">${sub}</div></span><span class="np-dist">${fmtDist(d)}${d<3?'<br><span style="font-weight:400;color:#777">'+mins+' min</span>':''}</span></button>`;
   }).join('');
   document.getElementById('nearby-panel').classList.add('open');
+  showNearbyPins(list);
   if(typeof gtag!=='undefined') gtag('event','open_nearby',{});
 }
 function pickNearby(idx){
@@ -3030,6 +3032,25 @@ function pickNearby(idx){
   closeNearby();
   map.setView([s.lat,s.lng],17);
   showSheet(s);
+}
+let nearbyMarkers=[];
+function clearNearbyMarkers(){ nearbyMarkers.forEach(m=>{m.remove(); const i=markers.indexOf(m); if(i>=0) markers.splice(i,1);}); nearbyMarkers=[]; }
+function showNearbyPins(list){
+  // Stops in the Nearby list that aren't already on the map (other routes or hidden categories) get their own pins
+  clearNearbyMarkers();
+  const shown=new Set(getVisible().map(s=>s.id));
+  list.forEach(({s})=>{
+    if(shown.has(s.id)) return;
+    const m=L.marker([s.lat,s.lng],{icon:mkIcon(s.cat, accessibleMode)}).addTo(map).on('click',(e)=>{
+      L.DomEvent.stopPropagation(e); L.DomEvent.preventDefault(e); showSheet(s);
+    });
+    m._stopId=s.id; nearbyMarkers.push(m); markers.push(m);
+  });
+  const pts=list.map(({s})=>[s.lat,s.lng]);
+  if(haversine({lat:userLat,lng:userLng},list[0].s)<2) pts.push([userLat,userLng]);
+  const panelH=(document.getElementById('nearby-panel')||{}).offsetHeight||0;
+  map.fitBounds(pts,{paddingTopLeft:[40,40],paddingBottomRight:[40,panelH+30],maxZoom:18});
+  setTimeout(declutterRouteMarkers, 80);
 }
 function closeNearby(){
   const p=document.getElementById('nearby-panel'); if(p) p.classList.remove('open');
