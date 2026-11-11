@@ -2972,8 +2972,11 @@ function nearbyCandidates(){
   // Every stop, regardless of route. Route copies that sit on the same spot as another stop are collapsed.
   const out=[];
   const sorted=[...stops].filter(s=>s.lat&&s.lng).sort((a,b)=>(isRouteCopy(a)?1:0)-(isRouteCopy(b)?1:0));
+  // Collapse only true duplicates: a route copy on the same spot AND naming the same place
+  // (e.g. the four Visitor Center versions). Different places that share a spot are all kept.
+  const base=n=>n.toLowerCase().split(/ — | & |: /)[0].replace(/^the /,'').trim();
   sorted.forEach(s=>{
-    if(isRouteCopy(s) && out.some(o=>haversine(o,s)<0.003)) return; // ~15 ft
+    if(isRouteCopy(s) && out.some(o=>haversine(o,s)<0.003 && base(o.name)===base(s.name))) return; // ~15 ft
     out.push(s);
   });
   return out;
