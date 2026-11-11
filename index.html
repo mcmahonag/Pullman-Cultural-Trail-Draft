@@ -369,6 +369,7 @@ body.font-xlarge .stop-card,.font-xlarge .place-card,.font-xlarge .time-card{lin
 .bottom-nav{height:calc(var(--nav-h) + var(--safe-bottom));padding-bottom:var(--safe-bottom);background:var(--bg);border-top:0.5px solid var(--border);display:flex;flex-shrink:0;z-index:30}
 .nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:none;background:none;cursor:pointer;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;padding:0;min-width:0;overflow:hidden}
 .nav-btn.active{color:var(--brand)}
+.wc-ic{width:20px;height:20px;flex-shrink:0;margin-top:1px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;opacity:.9}
 .nav-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
 .nav-btn span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
 </style>
@@ -391,19 +392,19 @@ body.font-xlarge .stop-card,.font-xlarge .place-card,.font-xlarge .time-card{lin
       <div style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.6);letter-spacing:.5px;margin-bottom:12px" id="wc-guide-title">HOW TO USE THIS APP</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         <div style="display:flex;gap:10px;align-items:flex-start">
-          <span style="font-size:18px">🗺</span>
+          <svg class="wc-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
           <div><div style="font-size:12px;font-weight:600;color:white" id="wc-tab1">Map</div><div style="font-size:11px;color:rgba(255,255,255,0.65)" id="wc-tab1d">Explore stops & thematic routes</div></div>
         </div>
         <div style="display:flex;gap:10px;align-items:flex-start">
-          <span style="font-size:18px">☰</span>
+          <svg class="wc-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
           <div><div style="font-size:12px;font-weight:600;color:white" id="wc-tab2">Stops</div><div style="font-size:11px;color:rgba(255,255,255,0.65)" id="wc-tab2d">Browse & filter all locations</div></div>
         </div>
         <div style="display:flex;gap:10px;align-items:flex-start">
-          <span style="font-size:18px">↕</span>
+          <svg class="wc-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 17H5a2 2 0 01-2-2V5a2 2 0 012-2h11l4 4-4 4H9v6z"/><path d="M9 17v2a2 2 0 002 2h6a2 2 0 002-2v-5"/></svg>
           <div><div style="font-size:12px;font-weight:600;color:white" id="wc-tab3">Directions</div><div style="font-size:11px;color:rgba(255,255,255,0.65)" id="wc-tab3d">Build a custom walking route</div></div>
         </div>
         <div style="display:flex;gap:10px;align-items:flex-start">
-          <span style="font-size:18px">📅</span>
+          <svg class="wc-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
           <div><div style="font-size:12px;font-weight:600;color:white" id="wc-tab4">Plan Trip</div><div style="font-size:11px;color:rgba(255,255,255,0.65)" id="wc-tab4d">Weather, food, events & tips</div></div>
         </div>
       </div>
