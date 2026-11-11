@@ -369,6 +369,7 @@ body.font-xlarge .stop-card,.font-xlarge .place-card,.font-xlarge .time-card{lin
 .bottom-nav{height:calc(var(--nav-h) + var(--safe-bottom));padding-bottom:var(--safe-bottom);background:var(--bg);border-top:0.5px solid var(--border);display:flex;flex-shrink:0;z-index:30}
 .nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:none;background:none;cursor:pointer;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;padding:0;min-width:0;overflow:hidden}
 .nav-btn.active{color:var(--brand)}
+.ui-ic{flex-shrink:0;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .wc-ic{width:20px;height:20px;flex-shrink:0;margin-top:1px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;opacity:.9}
 .nav-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
 .nav-btn span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
@@ -4296,7 +4297,7 @@ document.addEventListener('DOMContentLoaded',()=>{
       <span class="route-sheet-pill" id="route-sheet-pill"></span>
       <span style="font-size:11px;color:var(--muted)">·</span>
       <span class="route-sheet-time" id="route-sheet-time"></span>
-      <button class="route-sheet-view-map" id="route-sheet-view-map" onclick="viewRouteOnMap()"><span>🗺</span><span id="route-sheet-view-map-label">View on map</span></button>
+      <button class="route-sheet-view-map" id="route-sheet-view-map" onclick="viewRouteOnMap()"><svg class="ui-ic" style="width:14px;height:14px" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg><span id="route-sheet-view-map-label">View on map</span></button>
     </div>
     <div class="route-sheet-divider"></div>
     <p class="route-sheet-desc" id="route-sheet-desc"></p>
@@ -4306,12 +4307,12 @@ document.addEventListener('DOMContentLoaded',()=>{
     </div>
     <div style="display:flex;gap:8px;margin-bottom:10px">
       <button id="route-sheet-btn-navigate" onclick="startNavigationFromSheet()" style="font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;padding:13px 10px;border-radius:12px;border:none;background:var(--brand);color:#fff;cursor:pointer;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;line-height:1.2">
-        <span style="font-size:20px">🧭</span>
+        <svg class="ui-ic" style="width:22px;height:22px" viewBox="0 0 24 24" aria-hidden="true"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
         <span data-i18n="walk_trail">Walk the Trail</span>
         <span style="font-size:11px;font-weight:500;opacity:.8" data-i18n="inapp_nav">In-app navigation</span>
       </button>
       <a id="route-sheet-maps-link" href="#" target="_blank" style="font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;padding:13px 10px;border-radius:12px;background:var(--bg2);color:var(--text);border:1.5px solid var(--border);text-decoration:none;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;line-height:1.2;text-align:center">
-        <span style="font-size:20px">🚗</span>
+        <svg class="ui-ic" style="width:22px;height:22px" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
         <span>Google Maps</span>
         <span style="font-size:11px;font-weight:500;color:var(--muted)" data-i18n="drive_or_walk">Driving or walking</span>
       </a>
