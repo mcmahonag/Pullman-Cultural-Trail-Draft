@@ -181,7 +181,20 @@ html,body{height:100%;overflow:hidden;background:#1D4E2B;font-family:'DM Sans',s
 .map-weather-bar{display:flex;align-items:center;gap:8px;padding:6px 14px;background:var(--brand);color:rgba(255,255,255,0.95);flex-shrink:0;min-height:32px}
 .locate-fab{position:absolute;bottom:80px;right:10px;z-index:1000;width:54px;height:54px;border-radius:50%;background:white;border:none;box-shadow:0 2px 8px rgba(0,0,0,0.25);font-size:20px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;-webkit-appearance:none;color:#1D4E2B}
 .locate-fab.locating{opacity:.6;pointer-events:none}
-#demo-fab{position:absolute;bottom:148px;right:10px;z-index:1000;width:54px;height:54px;border-radius:50%;background:#00796B;border:none;box-shadow:0 2px 8px rgba(0,0,0,0.25);font-size:18px;cursor:pointer;display:none;flex-direction:column;align-items:center;justify-content:center;gap:1px;color:#fff;-webkit-appearance:none}
+#nearby-fab{bottom:148px}
+#nearby-panel{position:absolute;left:0;right:0;bottom:0;z-index:1500;background:#fff;border-radius:16px 16px 0 0;box-shadow:0 -4px 16px rgba(0,0,0,.18);padding:10px 16px 16px;max-height:60%;overflow-y:auto;transform:translateY(105%);transition:transform .25s ease}
+#nearby-panel.open{transform:translateY(0)}
+#nearby-panel .np-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+#nearby-panel .np-title{font-size:15px;font-weight:700;color:#1D4E2B}
+#nearby-panel .np-close{background:none;border:none;font-size:18px;color:#666;cursor:pointer;padding:4px 8px}
+#nearby-panel .np-note{font-size:12px;color:#666;margin-bottom:6px;line-height:1.4}
+#nearby-panel .np-item{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:none;border-top:1px solid #eee;padding:10px 0;cursor:pointer;font:inherit;color:inherit}
+#nearby-panel .np-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+#nearby-panel .np-main{flex:1;min-width:0}
+#nearby-panel .np-name{font-size:14px;font-weight:600;color:#222;line-height:1.3}
+#nearby-panel .np-sub{font-size:11px;color:#777;margin-top:2px}
+#nearby-panel .np-dist{font-size:12px;font-weight:600;color:#1D4E2B;white-space:nowrap;text-align:right}
+#demo-fab{position:absolute;bottom:216px;right:10px;z-index:1000;width:54px;height:54px;border-radius:50%;background:#00796B;border:none;box-shadow:0 2px 8px rgba(0,0,0,0.25);font-size:18px;cursor:pointer;display:none;flex-direction:column;align-items:center;justify-content:center;gap:1px;color:#fff;-webkit-appearance:none}
 #demo-fab span.fab-label{font-size:8px;font-weight:700;line-height:1;margin-top:1px}
 /* Demo sheet */
 #demo-sheet-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:8500;opacity:0;pointer-events:none;transition:opacity .25s}
@@ -475,6 +488,15 @@ body.font-xlarge .stop-card,.font-xlarge .place-card,.font-xlarge .time-card{lin
         <span style="font-size:18px;line-height:1">📍</span>
         <span style="font-size:9px;font-weight:600;line-height:1;margin-top:1px" data-i18n="locate_short">I'm here</span>
       </button>
+      <button id="nearby-fab" class="locate-fab" onclick="openNearby()" aria-label="Nearby stops">
+        <svg class="ui-ic" style="width:20px;height:20px" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8"/><path d="M12 1v3M12 20v3M1 12h3M20 12h3"/></svg>
+        <span style="font-size:9px;font-weight:600;line-height:1;margin-top:1px" data-i18n="nearby_short">Nearby</span>
+      </button>
+      <div id="nearby-panel" role="dialog" aria-label="Nearby stops">
+        <div class="np-head"><div class="np-title" data-i18n="nearby_title">Closest stops to you</div><button class="np-close" onclick="closeNearby()" aria-label="Close">✕</button></div>
+        <div class="np-note" id="nearby-note"></div>
+        <div id="nearby-list"></div>
+      </div>
       <button id="demo-fab" onclick="openDemoSheet()">
         <span style="font-size:18px;line-height:1">📊</span>
         <span class="fab-label">Data</span>
@@ -1590,6 +1612,7 @@ const translations = {
     learn_more:'Learn more ↗',
     wiz_step1:'Build a Route · Step 1 of 3', wiz_step2:'Build a Route · Step 2 of 3', wiz_step3:'Build a Route · Step 3 of 3', wiz_q1:'What interests you?', wiz_q1_sub:'Select one or more — or pick ⭐ for the full intro', wiz_q2:'How much time do you have?', wiz_th_none:'⭐ Just show me Pullman', wiz_th_people:'👤 People of Pullman', wiz_th_arch:'🏛 Architecture', wiz_th_rail:'🚂 Railroad', wiz_th_strike:'✊ Pullman Strike', wiz_th_education:'🎓 Education', wiz_th_green:'🌳 Green Spaces', wiz_th_film:'🎬 Film', wiz_th_vets:'🎖 Veterans', wiz_th_art:'🎨 Public Art', wiz_t45:'Core essentials', wiz_t90:'Essentials + interest', wiz_t180:'Full experience', wiz_today:'Visiting today?', wiz_today_sub:'Skip stops that are currently closed', wiz_next:'Next →', wiz_cancel:'Cancel', wiz_back:'← Back', wiz_preview:'Preview on Map →', bpb_label:'Route Preview', bpb_edit:'← Edit', bpb_walk:'🧭 Walk', bpb_save:'Save →', nav_locating:'📍 Getting your location…', nav_arrived:'You\'ve arrived', nav_continue:'Continue →', nav_next_stop:'Next Stop', nav_end:'End', dir_quick:'⚡ QUICK ROUTES', qr_essential:'⭐ Essential Pullman', qr_art:'🎨 Public Art', qr_people:'👤 People', qr_arch:'🏛 Architecture', qr_rail:'🚂 Railroad', qr_strike:'✊ Pullman Strike', qr_education:'🎓 Education', qr_green:'🌳 Green Spaces', qr_vets:'🎖 Veterans', qr_film:'🎬 Film', dir_distance:'Distance', dir_walking:'Walking', dir_stops:'Stops', walk_trail:'Walk the Trail', inapp_nav:'In-app navigation', drive_or_walk:'Driving or walking', pk_all:'All', pk_landmarks:'Landmarks', pk_museums:'Museums', pk_transit:'Transit', pk_art:'🎨 Art', pk_green:'🌳 Green', pk_vets:'🎖 Veterans', pk_film:'🎬 Film', add_stops:'Add stops', demo_now:'2015–now', then_head:'then head', final_stop:'final stop', segment:'Segment', of_word:'of', learn_more_people:'🔗 Learn more ↗', more_info:'🔗 More info ↗', stop_one:'stop', stop_many:'stops', tap_explore:'tap any to explore', skipped_closed:'skipped (currently closed)', n_more_short:'more', away:'away', head:'head', getting_location:'Getting your location…', stop_x_of:'Stop', last_stop:'Last Stop', finish:'Finish ✓', next_btn:'Next →', alert_min2:'Add at least 2 stops to navigate.', alert_min2b:'Add at least 2 stops to your route before starting navigation.', alert_geo:'Location services are required for navigation.', your_location:'Your Location',
     locate_short:'I\'m here', locate_finding:'Finding',
+    nearby_short:'Nearby', nearby_title:'Closest stops to you', nearby_far:'You are about {d} from Pullman. These are the closest stops.', nearby_hint:'Every stop on every route, sorted by distance. Tap one to open it.', nearby_on:'On the {r} route', nearby_err:'Could not get your location. Please check your location permissions.',
     list_showing:'Showing', list_of:'of', list_stops:'stops', theme_all:'All', theme_industry:'🏭 Industry & Innovation', theme_organizing:'✊ Organizing & Activism', theme_culture:'🎭 Culture & Identity', build_route_btn:'✦ Build Route',
     route_eyebrow:'Route', first_stops:'First stops', route_view_map:'View on map', route_edit_directions:'Edit in Directions →', route_close:'Close', route_swipe_hint:'Swipe down to close',
     begin_tour:'Begin Tour →', not_now:'Not now',
@@ -1644,6 +1667,7 @@ const translations = {
     learn_more:'Más información ↗',
     wiz_step1:'Crear una ruta · Paso 1 de 3', wiz_step2:'Crear una ruta · Paso 2 de 3', wiz_step3:'Crear una ruta · Paso 3 de 3', wiz_q1:'¿Qué te interesa?', wiz_q1_sub:'Elige uno o más, o toca ⭐ para la introducción completa', wiz_q2:'¿Cuánto tiempo tienes?', wiz_th_none:'⭐ Solo muéstrame Pullman', wiz_th_people:'👤 Personas de Pullman', wiz_th_arch:'🏛 Arquitectura', wiz_th_rail:'🚂 Ferrocarril', wiz_th_strike:'✊ Huelga Pullman', wiz_th_education:'🎓 Educación', wiz_th_green:'🌳 Espacios verdes', wiz_th_film:'🎬 Cine', wiz_th_vets:'🎖 Veteranos', wiz_th_art:'🎨 Arte público', wiz_t45:'Lo esencial', wiz_t90:'Lo esencial + tus intereses', wiz_t180:'Experiencia completa', wiz_today:'¿Visitas hoy?', wiz_today_sub:'Omitir paradas que estén cerradas ahora', wiz_next:'Siguiente →', wiz_cancel:'Cancelar', wiz_back:'← Atrás', wiz_preview:'Ver en el mapa →', bpb_label:'Vista previa de la ruta', bpb_edit:'← Editar', bpb_walk:'🧭 Caminar', bpb_save:'Guardar →', nav_locating:'📍 Obteniendo tu ubicación…', nav_arrived:'Has llegado', nav_continue:'Continuar →', nav_next_stop:'Siguiente parada', nav_end:'Terminar', dir_quick:'⚡ RUTAS RÁPIDAS', qr_essential:'⭐ Pullman esencial', qr_art:'🎨 Arte público', qr_people:'👤 Personas', qr_arch:'🏛 Arquitectura', qr_rail:'🚂 Ferrocarril', qr_strike:'✊ Huelga Pullman', qr_education:'🎓 Educación', qr_green:'🌳 Espacios verdes', qr_vets:'🎖 Veteranos', qr_film:'🎬 Cine', dir_distance:'Distancia', dir_walking:'A pie', dir_stops:'Paradas', walk_trail:'Recorrer el sendero', inapp_nav:'Navegación en la app', drive_or_walk:'En auto o a pie', pk_all:'Todas', pk_landmarks:'Monumentos', pk_museums:'Museos', pk_transit:'Transporte público', pk_art:'🎨 Arte', pk_green:'🌳 Verde', pk_vets:'🎖 Veteranos', pk_film:'🎬 Cine', add_stops:'Agregar paradas', demo_now:'2015–hoy', then_head:'luego dirígete al', final_stop:'última parada', segment:'Tramo', of_word:'de', learn_more_people:'🔗 Más información ↗', more_info:'🔗 Más detalles ↗', stop_one:'parada', stop_many:'paradas', tap_explore:'toca cualquiera para explorar', skipped_closed:'omitidas (cerradas ahora)', n_more_short:'más', away:'de distancia', head:'dirígete al', getting_location:'Obteniendo tu ubicación…', stop_x_of:'Parada', last_stop:'Última parada', finish:'Terminar ✓', next_btn:'Siguiente →', alert_min2:'Agrega al menos 2 paradas para navegar.', alert_min2b:'Agrega al menos 2 paradas a tu ruta antes de iniciar la navegación.', alert_geo:'Se requieren los servicios de ubicación para navegar.', your_location:'Tu ubicación',
     locate_short:'Estoy aquí', locate_finding:'Buscando',
+    nearby_short:'Cerca', nearby_title:'Paradas más cercanas a ti', nearby_far:'Estás a unos {d} de Pullman. Estas son las paradas más cercanas.', nearby_hint:'Todas las paradas de todas las rutas, ordenadas por distancia. Toca una para abrirla.', nearby_on:'En la ruta {r}', nearby_err:'No se pudo obtener tu ubicación. Revisa los permisos de ubicación.',
     list_showing:'Mostrando', list_of:'de', list_stops:'paradas', theme_all:'Todas', theme_industry:'🏭 Industria e innovación', theme_organizing:'✊ Organización y activismo', theme_culture:'🎭 Cultura e identidad', build_route_btn:'✦ Crear ruta',
     route_eyebrow:'Ruta', first_stops:'Primeras paradas', route_view_map:'Ver en el mapa', route_edit_directions:'Editar en Cómo llegar →', route_close:'Cerrar', route_swipe_hint:'Desliza hacia abajo para cerrar',
     begin_tour:'Comenzar recorrido →', not_now:'Ahora no',
@@ -2940,6 +2964,75 @@ function locateMe(){
     btn.innerHTML='<span style="font-size:18px;line-height:1">📍</span><span style="font-size:9px;font-weight:600;line-height:1;margin-top:1px" data-i18n="locate_short">'+t('locate_short')+'</span>';btn.classList.remove('locating');
     alert('Could not get your location. Please check your location permissions.');
   },{enableHighAccuracy:true,timeout:10000});
+}
+
+// ── What's near me ────────────────────
+function nearbyCandidates(){
+  // Every stop, regardless of route. Route copies that sit on the same spot as another stop are collapsed.
+  const out=[];
+  const sorted=[...stops].filter(s=>s.lat&&s.lng).sort((a,b)=>(isRouteCopy(a)?1:0)-(isRouteCopy(b)?1:0));
+  sorted.forEach(s=>{
+    if(isRouteCopy(s) && out.some(o=>haversine(o,s)<0.003)) return; // ~15 ft
+    out.push(s);
+  });
+  return out;
+}
+function routeOfStop(id){
+  const order=['essential','architecture','strike','railroad','education','people','public-art','green-spaces'];
+  const keys=Object.keys(routes).sort((a,b)=>(order.indexOf(a)+1||99)-(order.indexOf(b)+1||99));
+  return keys.find(k=>!routes[k].timed && routes[k].stops.includes(id));
+}
+function fmtDist(mi){
+  if(mi<0.1) return Math.max(50,Math.round(mi*5280/50)*50)+' ft';
+  return (mi<10?mi.toFixed(1):Math.round(mi))+' mi';
+}
+function placeUserMarker(){
+  if(userMarker) userMarker.remove();
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="#185FA5" opacity="0.25"/><circle cx="10" cy="10" r="5" fill="#185FA5"/><circle cx="10" cy="10" r="2.5" fill="white"/></svg>`;
+  userMarker=L.marker([userLat,userLng],{icon:L.divIcon({html:svg,className:'',iconSize:[20,20],iconAnchor:[10,10]}),zIndexOffset:1000}).addTo(map);
+}
+function openNearby(){
+  const btn=document.getElementById('nearby-fab');
+  if(!navigator.geolocation){alert(t('nearby_err'));return;}
+  btn.classList.add('locating');
+  navigator.geolocation.getCurrentPosition(pos=>{
+    btn.classList.remove('locating');
+    userLat=pos.coords.latitude;userLng=pos.coords.longitude;
+    placeUserMarker();
+    renderNearby();
+    renderList();
+  },err=>{
+    btn.classList.remove('locating');
+    alert(t('nearby_err'));
+  },{enableHighAccuracy:true,timeout:10000,maximumAge:30000});
+}
+function renderNearby(){
+  const me={lat:userLat,lng:userLng};
+  const list=nearbyCandidates().map(s=>({s,d:haversine(me,s)})).sort((a,b)=>a.d-b.d).slice(0,6);
+  const vc={lat:41.694361788691246,lng:-87.60875639931434};
+  const far=haversine(me,vc);
+  document.getElementById('nearby-note').textContent = far>2 ? t('nearby_far').replace('{d}',fmtDist(far)) : t('nearby_hint');
+  const lang=currentLang;
+  document.getElementById('nearby-list').innerHTML=list.map(({s,d},i)=>{
+    const name = lang==='es'&&stopNameKey[s.id] ? t(stopNameKey[s.id]) : s.name;
+    const rk = isRouteCopy(s) ? routeOfStop(s.id) : null;
+    const rl = rk ? (routes[rk].label[lang]||routes[rk].label.en) : '';
+    const color = rk ? routes[rk].color : ((catColors[s.cat]||{fill:'#444'}).fill);
+    const sub = rk ? t('nearby_on').replace('{r}',rl) : catLabel(s.cat);
+    const mins = Math.max(1,Math.round(d/0.05));
+    return `<button class="np-item" onclick="pickNearby(${stops.indexOf(s)})"><span class="np-dot" style="background:${color}"></span><span class="np-main"><div class="np-name">${name}</div><div class="np-sub">${sub}</div></span><span class="np-dist">${fmtDist(d)}${d<3?'<br><span style="font-weight:400;color:#777">'+mins+' min</span>':''}</span></button>`;
+  }).join('');
+  document.getElementById('nearby-panel').classList.add('open');
+  if(typeof gtag!=='undefined') gtag('event','open_nearby',{});
+}
+function pickNearby(idx){
+  const s=stops[idx]; if(!s) return;
+  closeNearby();
+  map.setView([s.lat,s.lng],17);
+  showSheet(s);
+}
+function closeNearby(){
+  const p=document.getElementById('nearby-panel'); if(p) p.classList.remove('open');
 }
 
 function walkMins(toLat,toLng){
