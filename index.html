@@ -4501,5 +4501,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   </div>
 </div>
 
+<!-- TEMP-DIAG: remove after iOS layout check -->
+<script>window.addEventListener('load',()=>setTimeout(()=>{var sa=navigator.standalone,dm=matchMedia('(display-mode: standalone)').matches;if(!sa&&!dm&&location.hash!=='#diag')return;var p=document.createElement('div');p.style.cssText='position:fixed;top:0;left:0;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);visibility:hidden';document.body.appendChild(p);var cs=getComputedStyle(p),h=document.documentElement.getBoundingClientRect().height,n=document.querySelector('.bottom-nav').getBoundingClientRect();var d=document.createElement('div');d.id='diag';d.style.cssText='position:fixed;left:6px;bottom:2px;z-index:99999;font:11px/1.2 monospace;color:#c00;background:rgba(255,255,255,.85);padding:2px 4px;pointer-events:none';d.textContent='iH'+innerHeight+' sH'+screen.height+' html'+Math.round(h)+' navB'+Math.round(n.bottom)+' saT'+cs.paddingTop+' saB'+cs.paddingBottom+' ns'+(sa?1:0)+' dm'+(dm?1:0)+' vv'+(window.visualViewport?Math.round(visualViewport.height):'-');document.body.appendChild(d)},1500))</script>
 </body>
 </html>
