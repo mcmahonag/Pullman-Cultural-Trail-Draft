@@ -55,9 +55,9 @@ window.addEventListener('online',()=>{
 }
 html,body{height:100%;overflow:hidden;background:#1D4E2B;font-family:'DM Sans',sans-serif;color:var(--text)}
 #shell{display:flex;flex-direction:column;height:100%;max-width:480px;margin:0 auto;background:var(--bg);position:relative;box-shadow:0 0 40px rgba(0,0,0,0.2)}
-.top-bar{min-height:calc(var(--header-h) + var(--safe-top) + var(--edge-gap));background:var(--brand);display:flex;align-items:center;padding:calc(8px + var(--safe-top) + var(--edge-gap)) 14px 8px;gap:10px;flex-shrink:0;z-index:10}
+.top-bar{min-height:calc(var(--header-h) + var(--safe-top) + var(--edge-gap));background:var(--brand);display:flex;align-items:center;padding:calc(8px + var(--safe-top) + var(--edge-gap)) 14px 8px;gap:10px;flex-shrink:0;z-index:10;position:sticky;top:0}
 /* iOS 26: solid brand strip behind the clock/battery so the system edge blur has a flat color to sample */
-@media (display-mode: standalone){:root{--edge-gap:20px}}
+@media (display-mode: standalone){:root{--edge-gap:0px}} /* TEST: sticky bars instead of gap */
 #status-fill{position:fixed;top:0;left:0;right:0;height:var(--safe-top);background:var(--brand);z-index:25000;pointer-events:none}
 .top-logo{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .top-logo svg{width:18px;height:18px;fill:#fff}
@@ -385,7 +385,7 @@ body.font-xlarge .stop-card,.font-xlarge .place-card,.font-xlarge .time-card{lin
 .npca-text-fallback{align-items:center;gap:6px}
 .npca-abbr{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:#fff;letter-spacing:.5px}
 .npca-full{font-size:10px;color:rgba(255,255,255,0.85);font-weight:500}
-.bottom-nav{height:calc(var(--nav-h) + var(--safe-bottom));padding-bottom:var(--safe-bottom);background:var(--bg);border-top:0.5px solid var(--border);display:flex;flex-shrink:0;z-index:30}
+.bottom-nav{position:sticky;bottom:0;height:calc(var(--nav-h) + var(--safe-bottom));padding-bottom:var(--safe-bottom);background:var(--bg);border-top:0.5px solid var(--border);display:flex;flex-shrink:0;z-index:30}
 .nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:none;background:none;cursor:pointer;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;padding:0;min-width:0;overflow:hidden}
 .nav-btn.active{color:var(--brand)}
 .ui-ic{flex-shrink:0;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
