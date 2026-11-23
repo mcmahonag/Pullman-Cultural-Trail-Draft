@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="Pullman Trail"/>
 <meta name="theme-color" content="#1D4E2B"/>
 <link rel="manifest" href="manifest.json"/>
@@ -49,10 +49,13 @@ window.addEventListener('online',()=>{
   --border:rgba(0,0,0,0.12);
   --nav-h:64px;--header-h:56px;
   --safe-bottom:env(safe-area-inset-bottom,0px);
+  --safe-top:env(safe-area-inset-top,0px);
 }
 html,body{height:100%;overflow:hidden;background:#1D4E2B;font-family:'DM Sans',sans-serif;color:var(--text)}
 #shell{display:flex;flex-direction:column;height:100%;max-width:480px;margin:0 auto;background:var(--bg);position:relative;box-shadow:0 0 40px rgba(0,0,0,0.2)}
-.top-bar{min-height:var(--header-h);background:var(--brand);display:flex;align-items:center;padding:8px 14px;gap:10px;flex-shrink:0;z-index:10}
+.top-bar{min-height:calc(var(--header-h) + var(--safe-top));background:var(--brand);display:flex;align-items:center;padding:calc(8px + var(--safe-top)) 14px 8px;gap:10px;flex-shrink:0;z-index:10}
+/* iOS 26: solid brand strip behind the clock/battery so the system edge blur has a flat color to sample */
+#status-fill{position:fixed;top:0;left:0;right:0;height:var(--safe-top);background:var(--brand);z-index:25000;pointer-events:none}
 .top-logo{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .top-logo svg{width:18px;height:18px;fill:#fff}
 .top-text{min-width:0;flex:1}
@@ -390,7 +393,8 @@ body.font-xlarge .stop-card,.font-xlarge .place-card,.font-xlarge .time-card{lin
 </head>
 <body>
 <!-- Welcome Screen -->
-<div id="welcome-screen" style="position:fixed;inset:0;z-index:20000;background:#1D4E2B;display:flex;flex-direction:column;overflow-y:auto">
+<div id="status-fill" aria-hidden="true"></div>
+<div id="welcome-screen" style="position:fixed;inset:0;z-index:20000;background:#1D4E2B;display:flex;flex-direction:column;overflow-y:auto;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)">
   <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px 20px;text-align:center;max-width:480px;margin:0 auto;width:100%">
     <!-- Logo mark -->
     <div style="width:72px;height:72px;background:rgba(255,255,255,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:20px">
@@ -443,7 +447,7 @@ body.font-xlarge .stop-card,.font-xlarge .place-card,.font-xlarge .time-card{lin
 </div>
 
 <!-- Offline banner -->
-<div id="offline-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:30000;background:#B84A0C;color:white;padding:8px 16px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;align-items:center;justify-content:center;gap:8px">
+<div id="offline-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:30000;background:#B84A0C;color:white;padding:calc(8px + env(safe-area-inset-top,0px)) 16px 8px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;align-items:center;justify-content:center;gap:8px">
   <span>📵</span><span id="offline-msg">You're offline — map tiles may not load but stop info is available</span>
 </div>
 <div id="shell">
@@ -678,7 +682,7 @@ body.font-xlarge .stop-card,.font-xlarge .place-card,.font-xlarge .time-card{lin
   </div><!-- end .content -->
     <!-- About / Legal modal -->
   <div id="about-modal" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.5)" onclick="closeAbout()">
-    <div id="about-inner" style="position:absolute;bottom:0;left:0;right:0;background:var(--bg);border-radius:18px 18px 0 0;max-height:80vh;overflow-y:auto;padding:20px 18px 40px" onclick="event.stopPropagation()">
+    <div id="about-inner" style="position:absolute;bottom:0;left:0;right:0;background:var(--bg);border-radius:18px 18px 0 0;max-height:80vh;overflow-y:auto;padding:20px 18px calc(40px + env(safe-area-inset-bottom,0px))" onclick="event.stopPropagation()">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
         <div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--text)" id="about-title">ℹ️ About this app</div>
         <button onclick="closeAbout()" aria-label="Close" style="background:var(--bg2);border:none;border-radius:50%;width:28px;height:28px;font-size:14px;cursor:pointer;color:var(--muted)">✕</button>
