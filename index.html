@@ -10,6 +10,13 @@
 <link rel="manifest" href="manifest.json"/>
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png"/>
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png"/>
+<script>/* iOS home-screen detection that works with or without a manifest */
+if(navigator.standalone||matchMedia('(display-mode: standalone)').matches)document.documentElement.classList.add('standalone');</script>
+<script>/* iOS 27 home-screen bug: CSS 100% can come out one status bar shorter than the real window.
+   Size the page from innerHeight instead, and let bottom-anchored overlays reach the real bottom. */
+(function(){var d=document.documentElement,probe;function f(){if(!(navigator.standalone||matchMedia('(display-mode: standalone)').matches))return;if(!probe&&document.body){probe=document.createElement('div');probe.style.cssText='position:fixed;top:0;left:0;width:0;height:100%;visibility:hidden;pointer-events:none';document.body.appendChild(probe)}var h=innerHeight;d.style.height=h+'px';var icb=probe?probe.getBoundingClientRect().height:h;var gap=Math.max(0,Math.round(h-icb));d.style.setProperty('--vp-gap',gap+'px');d.setAttribute('data-hfix',h+'/'+gap)}f();document.addEventListener('DOMContentLoaded',f);addEventListener('load',function(){f();setTimeout(f,500)});addEventListener('resize',f);addEventListener('pageshow',f);if(window.visualViewport)visualViewport.addEventListener('resize',f)})();</script>
+<style>/* overlays anchored to the bottom follow the real window bottom */
+html.standalone #welcome-screen,html.standalone #about-modal,html.standalone #route-sheet-backdrop,html.standalone #demo-sheet-backdrop,html.standalone .sheet,html.standalone #route-info-sheet,html.standalone #demo-sheet{bottom:calc(0px - var(--vp-gap,0px))!important}</style>
 <script>
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{
